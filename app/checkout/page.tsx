@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
@@ -14,11 +14,13 @@ interface Trip {
   agencies: { name: string } | null
 }
 
-export default function CheckoutPage() {
+// ── INNER COMPONENT ───────────────────────────────────────────────────────────
+// useSearchParams() must live inside a component wrapped in Suspense
+// So we split the page into an inner component and an outer wrapper
+function CheckoutInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Read the three values passed from the seat map page via the URL
   const tripId     = searchParams.get('tripId')
   const seatId     = searchParams.get('seatId')
   const seatNumber = searchParams.get('seatNumber')
@@ -49,46 +51,36 @@ export default function CheckoutPage() {
   }
 
   async function handlePay() {
-    // Validate inputs
     if (!fullName.trim()) { setError('Please enter your full name.'); return }
     if (!phone.trim())    { setError('Please enter your phone number.'); return }
 
     setError('')
     setPaying(true)
 
-    // For MVP we skip auth entirely — create booking with no user_id
-    // We store the passenger name and phone directly on the booking
-    // First we need to add those columns — but to keep it simple for MVP,
-    // we just create the booking and store name/phone in localStorage
     localStorage.setItem('passenger_name', fullName.trim())
     localStorage.setItem('passenger_phone', phone.trim())
 
-    // Create the booking record
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .insert({
-        trip_id: tripId,       // which trip
-        seat_id: seatId,       // which seat
-        status: 'confirmed',   // immediately confirmed for MVP
-        // user_id is intentionally omitted — not using auth for MVP
+        trip_id: tripId,
+        seat_id: seatId,
+        status: 'confirmed',
       })
       .select()
       .single()
 
     if (bookingError || !booking) {
-      // Show the actual error so we can debug it
       setError('Booking failed: ' + (bookingError?.message || 'unknown error'))
       setPaying(false)
       return
     }
 
-    // Mark the seat as booked so no one else can take it
     await supabase
       .from('seats')
       .update({ status: 'booked', locked_by: null, locked_until: null })
       .eq('id', seatId)
 
-    // Go to the ticket page with the booking reference
     router.push(`/ticket/${booking.booking_ref}`)
   }
 
@@ -117,14 +109,13 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="max-w-md mx-auto">
 
-        {/* ── BACK BUTTON ── */}
         <button onClick={() => router.back()} className="text-green-600 text-sm mb-4">
           ← Back to seats
         </button>
 
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Checkout</h1>
 
-        {/* ── TRIP SUMMARY ── */}
+        {/* TRIP SUMMARY */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
             Trip Summary
@@ -144,7 +135,7 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* ── PASSENGER DETAILS ── */}
+        {/* PASSENGER DETAILS */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
             Passenger Details
@@ -171,12 +162,10 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* ── ERROR MESSAGE ── */}
         {error && (
           <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
         )}
 
-        {/* ── PAY BUTTON ── */}
         <button
           onClick={handlePay}
           disabled={paying}
@@ -191,5 +180,20 @@ export default function CheckoutPage() {
 
       </div>
     </main>
+  )
+}
+
+// ── OUTER WRAPPER ─────────────────────────────────────────────────────────────
+// This is what Next.js sees as the page — it wraps the inner component in Suspense
+// Suspense shows a fallback while the component loads, which satisfies Next.js's requirement
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Loading...
+      </div>
+    }>
+      <CheckoutInner />
+    </Suspense>
   )
 }
