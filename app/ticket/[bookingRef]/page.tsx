@@ -37,6 +37,7 @@ export default function TicketPage({ params }: { params: Promise<{ bookingRef: s
 
   async function loadBooking() {
     setLoading(true)
+
     const { data } = await supabase
       .from('bookings')
       .select(`*, trips ( origin, destination, departure_time, bus_class, price, agencies ( name ) ), seats ( seat_number )`)
@@ -45,6 +46,35 @@ export default function TicketPage({ params }: { params: Promise<{ bookingRef: s
 
     if (!data) { router.push('/'); return }
     setBooking(data)
+
+    // Send SMS confirmation if we have a phone number
+    // We only send once — check localStorage flag so it doesn't send on every page refresh
+    const smsSent = localStorage.getItem(`sms_sent_${bookingRef}`)
+    const phone   = localStorage.getItem('passenger_phone')
+
+    if (!smsSent && phone && data.trips) {
+      try {
+        await fetch('/api/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            to:            phone,
+            bookingRef:    data.booking_ref,
+            origin:        data.trips.origin,
+            destination:   data.trips.destination,
+            departureTime: data.trips.departure_time,
+            agencyName:    data.trips.agencies?.name || '',
+            busClass:      data.trips.bus_class,
+            seatNumber:    data.seats?.seat_number ?? '—',
+          }),
+        })
+        // Mark as sent so we don't send again on refresh
+        localStorage.setItem(`sms_sent_${bookingRef}`, 'true')
+      } catch (e) {
+        console.error('SMS failed:', e)
+      }
+    }
+
     setLoading(false)
   }
 
@@ -82,6 +112,11 @@ export default function TicketPage({ params }: { params: Promise<{ bookingRef: s
           </div>
           <h1 className="text-2xl font-bold text-gray-800 mb-1">Booking Confirmed!</h1>
           <p className="text-gray-400 text-sm">Your ticket has been reserved successfully</p>
+          {passengerPhone && (
+            <p className="text-green-500 text-xs mt-1">
+              📱 SMS confirmation sent to {passengerPhone}
+            </p>
+          )}
         </div>
 
         {/* TICKET CARD */}
