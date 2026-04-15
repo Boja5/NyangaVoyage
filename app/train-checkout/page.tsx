@@ -3,37 +3,29 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
-function CheckoutInner() {
+function TrainCheckoutInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const tripId = searchParams.get('tripId') || ''
-  const seatId = searchParams.get('seatId') || ''
-  const seatNumber = searchParams.get('seatNumber') || ''
+  const origin = searchParams.get('origin') || ''
+  const destination = searchParams.get('destination') || ''
+  const date = searchParams.get('date') || ''
+  const className = searchParams.get('class') || ''
+  const depart = searchParams.get('depart') || ''
+  const arrive = searchParams.get('arrive') || ''
+  const duration = searchParams.get('duration') || ''
+  const km = searchParams.get('km') || ''
+  const price = parseInt(searchParams.get('price') || '0')
+  const seat = searchParams.get('seat') || ''
+  const compartment = searchParams.get('compartment') || ''
 
-  const [trip, setTrip] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [momoNumber, setMomoNumber] = useState('')
   const [paying, setPaying] = useState(false)
   const [countdown, setCountdown] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
-
-  useEffect(() => {
-    if (!tripId) return
-    supabase
-      .from('trips')
-      .select('*, agencies(name)')
-      .eq('id', tripId)
-      .single()
-      .then(({ data }) => {
-        setTrip(data)
-        setLoading(false)
-      })
-  }, [tripId])
 
   useEffect(() => {
     if (countdown <= 0) return
@@ -55,57 +47,19 @@ function CheckoutInner() {
     if (!validate()) return
     localStorage.setItem('nv_passenger_name', fullName)
     localStorage.setItem('nv_passenger_phone', phone)
+    localStorage.setItem('nv_train_booking', JSON.stringify({
+      origin, destination, date, className, depart, arrive,
+      duration, km, price, seat, compartment,
+      passengerName: fullName, passengerPhone: phone,
+    }))
     setPaying(true)
     setCountdown(5)
   }
 
-  async function finishBooking() {
-    try {
-      const bookingRef = Math.random().toString(36).slice(2, 10).toUpperCase()
-
-      await supabase.from('seats').update({
-        status: 'booked',
-        locked_until: null,
-        locked_by: null,
-      }).eq('id', seatId)
-
-      const { data: booking } = await supabase.from('bookings').insert({
-        trip_id: tripId,
-        seat_id: seatId,
-        status: 'confirmed',
-        booking_ref: bookingRef,
-      }).select().single()
-
-      if (booking) {
-        router.push('/ticket/' + booking.booking_ref)
-      }
-    } catch (err) {
-      console.error(err)
-      setPaying(false)
-      setCountdown(0)
-    }
+  function finishBooking() {
+    const ref = 'TR' + Math.random().toString(36).slice(2, 8).toUpperCase()
+    router.push('/ticket/train/' + ref)
   }
-
-  function formatTime(dt: string) {
-    return new Date(dt).toLocaleTimeString('fr-CM', { hour: '2-digit', minute: '2-digit', hour12: false })
-  }
-
-  function formatDate(dt: string) {
-    return new Date(dt).toLocaleDateString('fr-CM', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-  }
-
-  if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
-      <div className="nv-spinner nv-spinner-lg" />
-    </div>
-  )
-
-  if (!trip) return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', gap: '16px', fontFamily: 'var(--nv-font-body)' }}>
-      <div style={{ fontSize: '18px', fontWeight: 600 }}>Trajet introuvable</div>
-      <Link href="/" className="nv-btn nv-btn-primary">Retour</Link>
-    </div>
-  )
 
   if (paying) return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'var(--nv-font-body)', background: 'var(--nv-bg-page)' }}>
@@ -115,7 +69,7 @@ function CheckoutInner() {
           Paiement en cours...
         </div>
         <div style={{ fontSize: '14px', color: 'var(--nv-text-secondary)', marginBottom: '20px' }}>
-          Une notification MTN MoMo a ete envoyee au +237 {momoNumber}
+          Notification MTN MoMo envoyee au +237 {momoNumber}
         </div>
         <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '48px', fontWeight: 800, color: 'var(--nv-green-600)' }}>
           {countdown}
@@ -133,13 +87,16 @@ function CheckoutInner() {
       <nav className="nv-nav">
         <div className="nv-nav-inner">
           <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
+          <div className="nv-nav-right">
+            <span className="nv-badge nv-badge-gold">Camrail</span>
+          </div>
         </div>
       </nav>
 
       <div style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', padding: '14px 0' }}>
         <div className="nv-container">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-            {['Recherche', 'Choix du siege', 'Paiement', 'Billet'].map((step, i) => (
+            {['Recherche', 'Choix de la place', 'Paiement', 'Billet'].map((step, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 {i > 0 && <span style={{ color: 'var(--nv-text-muted)' }}>&rarr;</span>}
                 <span style={{
@@ -174,7 +131,6 @@ function CheckoutInner() {
                   />
                   {errors.fullName && <div className="nv-error-msg">{errors.fullName}</div>}
                 </div>
-
                 <div className="nv-form-group">
                   <label className="nv-label">Numero de telephone</label>
                   <div style={{ display: 'flex', gap: '8px' }}>
@@ -200,7 +156,7 @@ function CheckoutInner() {
                 Paiement MTN Mobile Money
               </div>
               <div style={{ fontSize: '13px', color: 'var(--nv-text-secondary)', marginBottom: '18px' }}>
-                Entrez votre numero MTN MoMo. Une notification de paiement sera envoyee sur ce numero.
+                Paiement accepte via MTN MoMo ou Orange Money uniquement (Camrail).
               </div>
               <div className="nv-form-group">
                 <label className="nv-label">Numero MTN MoMo</label>
@@ -221,7 +177,7 @@ function CheckoutInner() {
               </div>
               <div className="nv-alert nv-alert-warning" style={{ marginTop: '16px' }}>
                 <div style={{ fontSize: '13px' }}>
-                  Mode demo — aucun vrai paiement ne sera effectue. Cliquez Payer pour simuler la transaction.
+                  Mode demo — aucun vrai paiement ne sera effectue.
                 </div>
               </div>
             </div>
@@ -231,22 +187,24 @@ function CheckoutInner() {
           <div style={{ position: 'sticky', top: '80px' }}>
             <div className="nv-card" style={{ padding: '24px', marginBottom: '16px' }}>
               <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--nv-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
-                Recapitulatif
+                Recapitulatif Camrail
               </div>
 
               <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
-                {trip.origin} &rarr; {trip.destination}
+                {origin} &rarr; {destination}
               </div>
               <div style={{ fontSize: '13px', color: 'var(--nv-text-secondary)', marginBottom: '20px' }}>
-                {formatDate(trip.departure_time)}
+                {date && new Date(date).toLocaleDateString('fr-CM', { weekday: 'long', day: 'numeric', month: 'long' })}
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
                 {[
-                  { label: 'Agence', value: trip.agencies?.name },
-                  { label: 'Depart', value: formatTime(trip.departure_time) },
-                  { label: 'Classe', value: trip.bus_class },
-                  { label: 'Siege', value: 'N' + seatNumber },
+                  { label: 'Depart', value: depart },
+                  { label: 'Arrivee', value: arrive },
+                  { label: 'Duree', value: duration },
+                  { label: 'Distance', value: km + ' km' },
+                  { label: 'Classe', value: className },
+                  { label: className.includes('Couchette') ? 'Couchette' : 'Place', value: 'N' + seat + (compartment ? ' - Comp. ' + compartment : '') },
                 ].map((row, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
                     <span style={{ color: 'var(--nv-text-secondary)' }}>{row.label}</span>
@@ -258,34 +216,33 @@ function CheckoutInner() {
               <div style={{ borderTop: '1.5px solid var(--nv-border)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--nv-gray-900)' }}>Total</span>
                 <span style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--nv-green-600)' }}>
-                  {trip.price.toLocaleString('fr-CM')} FCFA
+                  {price.toLocaleString('fr-CM')} FCFA
                 </span>
               </div>
 
               <button className="nv-btn nv-btn-primary nv-btn-full nv-btn-lg" onClick={handlePay}>
-                Payer {trip.price.toLocaleString('fr-CM')} FCFA &rarr;
+                Payer {price.toLocaleString('fr-CM')} FCFA &rarr;
               </button>
             </div>
 
-            <Link href={'javascript:history.back()'} className="nv-btn nv-btn-secondary nv-btn-full" style={{ textAlign: 'center' }}>
+            <Link href="javascript:history.back()" className="nv-btn nv-btn-secondary nv-btn-full" style={{ textAlign: 'center' }}>
               &larr; Retour
             </Link>
           </div>
-
         </div>
       </div>
     </div>
   )
 }
 
-export default function CheckoutPage() {
+export default function TrainCheckoutPage() {
   return (
     <Suspense fallback={
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
         <div className="nv-spinner nv-spinner-lg" />
       </div>
     }>
-      <CheckoutInner />
+      <TrainCheckoutInner />
     </Suspense>
   )
 }
