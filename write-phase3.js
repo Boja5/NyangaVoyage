@@ -1,4 +1,5 @@
-﻿'use client'
+const fs = require('fs');
+const content = `'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -394,4 +395,6 @@ export default function HomePage() {
     </div>
   )
 }
-
+`;
+fs.writeFileSync('app/page.tsx', content, 'utf8');
+console.log('Done - ' + content.length + ' chars written');
