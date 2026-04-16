@@ -1,4 +1,84 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+// ============================================================
+// SHARED NAVBAR COMPONENT
+// ============================================================
+const navbar = `'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useLang } from '@/lib/i18n'
+
+export default function Navbar() {
+  const { lang, setLang } = useLang()
+  const pathname = usePathname()
+
+  const isAgency = pathname?.startsWith('/agency')
+  const isAdmin = pathname?.startsWith('/admin')
+
+  if (isAgency || isAdmin) {
+    return (
+      <nav className="nv-nav">
+        <div className="nv-nav-inner">
+          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
+          {isAgency && (
+            <div className="nv-nav-links">
+              <Link href="/agency/dashboard" className={'nv-nav-link' + (pathname === '/agency/dashboard' ? ' active' : '')}>
+                {lang === 'fr' ? 'Tableau de bord' : 'Dashboard'}
+              </Link>
+              <Link href="/agency/trips" className={'nv-nav-link' + (pathname === '/agency/trips' ? ' active' : '')}>
+                {lang === 'fr' ? 'Mes trajets' : 'My trips'}
+              </Link>
+              <Link href="/agency/bookings" className={'nv-nav-link' + (pathname === '/agency/bookings' ? ' active' : '')}>
+                {lang === 'fr' ? 'Reservations' : 'Bookings'}
+              </Link>
+            </div>
+          )}
+          {isAdmin && (
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--nv-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Admin
+            </div>
+          )}
+          <div className="nv-nav-right">
+            <div className="nv-lang-toggle">
+              <button className={'nv-lang-btn' + (lang === 'fr' ? ' active' : '')} onClick={() => setLang('fr')}>FR</button>
+              <button className={'nv-lang-btn' + (lang === 'en' ? ' active' : '')} onClick={() => setLang('en')}>EN</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
+  return (
+    <nav className="nv-nav">
+      <div className="nv-nav-inner">
+        <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
+        <div className="nv-nav-links">
+          <Link href="/search" className={'nv-nav-link' + (pathname === '/search' ? ' active' : '')}>
+            {lang === 'fr' ? 'Trajets' : 'Routes'}
+          </Link>
+        </div>
+        <div className="nv-nav-right">
+          <div className="nv-lang-toggle">
+            <button className={'nv-lang-btn' + (lang === 'fr' ? ' active' : '')} onClick={() => setLang('fr')}>FR</button>
+            <button className={'nv-lang-btn' + (lang === 'en' ? ' active' : '')} onClick={() => setLang('en')}>EN</button>
+          </div>
+          <Link href="/agency/login" className="nv-btn nv-btn-primary nv-btn-sm">
+            {lang === 'fr' ? 'Espace Agence' : 'Agency Portal'}
+          </Link>
+        </div>
+      </div>
+    </nav>
+  )
+}
+`;
+
+// ============================================================
+// RESULTS PAGE - replace navbar with shared Navbar
+// ============================================================
+const results = `'use client'
 
 import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -259,3 +339,51 @@ export default function ResultsPage() {
     </Suspense>
   )
 }
+`;
+
+// Write files
+if (!fs.existsSync('components')) fs.mkdirSync('components');
+fs.writeFileSync(path.join('components', 'Navbar.tsx'), navbar, 'utf8');
+console.log('Written: components/Navbar.tsx');
+
+fs.writeFileSync(path.join('app', 'results', 'page.tsx'), results, 'utf8');
+console.log('Written: app/results/page.tsx');
+
+// Now patch other pages to use Navbar component
+const pagesToPatch = [
+  'app/search/page.tsx',
+  'app/checkout/page.tsx',
+  'app/train-results/page.tsx',
+  'app/train-seats/page.tsx',
+  'app/agency/login/page.tsx',
+  'app/agency/dashboard/page.tsx',
+  'app/agency/trips/page.tsx',
+  'app/agency/bookings/page.tsx',
+  'app/admin/login/page.tsx',
+  'app/admin/dashboard/page.tsx',
+];
+
+pagesToPatch.forEach(p => {
+  if (!fs.existsSync(p)) return;
+  let content = fs.readFileSync(p, 'utf8');
+
+  // Add Navbar import if not present
+  if (!content.includes("import Navbar from '@/components/Navbar'")) {
+    content = content.replace(
+      "import Link from 'next/link'",
+      "import Link from 'next/link'\nimport Navbar from '@/components/Navbar'"
+    );
+  }
+
+  // Replace inline nav tags with <Navbar />
+  // Pattern: <nav className="nv-nav">...</nav> — replace with <Navbar />
+  content = content.replace(
+    /<nav className="nv-nav">[\s\S]*?<\/nav>/g,
+    '<Navbar />'
+  );
+
+  fs.writeFileSync(p, content, 'utf8');
+  console.log('Patched: ' + p);
+});
+
+console.log('All done! Language toggle now on every page.');

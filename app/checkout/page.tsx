@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
 function CheckoutInner() {
@@ -130,11 +131,7 @@ function CheckoutInner() {
   return (
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
 
-      <nav className="nv-nav">
-        <div className="nv-nav-inner">
-          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
-        </div>
-      </nav>
+      <Navbar />
 
       <div style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', padding: '14px 0' }}>
         <div className="nv-container">

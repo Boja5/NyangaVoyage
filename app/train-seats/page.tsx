@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 type Compartment = {
   id: number
@@ -112,14 +113,7 @@ function TrainSeatsInner() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
 
       {/* NAVBAR */}
-      <nav className="nv-nav">
-        <div className="nv-nav-inner">
-          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
-          <div className="nv-nav-right">
-            <span className="nv-badge nv-badge-gold">Camrail</span>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* PROGRESS */}
       <div style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', padding: '14px 0' }}>

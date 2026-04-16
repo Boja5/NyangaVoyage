@@ -222,3 +222,32 @@ img { max-width: 100%; display: block; }
 .nv-underline-gold::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, var(--nv-gold-400), var(--nv-gold-600)); border-radius: 2px; }
 .nv-highlight { color: var(--nv-green-600); }
 .nv-highlight-gold { color: var(--nv-gold-600); }
+
+/* ============================================================
+   MOBILE RESPONSIVE — Added for clean mobile experience
+   ============================================================ */
+
+@media (max-width: 768px) {
+  :root { --nv-max-width: 100%; }
+
+  .nv-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .nv-section { padding-top: 40px; padding-bottom: 40px; }
+  .nv-section-sm { padding-top: 28px; padding-bottom: 28px; }
+
+  .nv-nav-links { display: none; }
+
+  .nv-nav-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .nv-nav-logo { font-size: 18px; }
+
+  .nv-trip-card { flex-wrap: wrap; }
+
+  .nv-footer-inner { flex-direction: column; gap: 8px; }
+}

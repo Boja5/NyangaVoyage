@@ -1,9 +1,11 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+const searchPage = `'use client'
 
 import { Suspense, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navbar from '@/components/Navbar'
 
 const BUS_CITIES = [
   'Yaounde', 'Douala', 'Bafoussam', 'Bamenda', 'Garoua',
@@ -59,7 +61,17 @@ function SearchInner() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
 
       {/* NAVBAR */}
-      <Navbar />
+      <nav className="nv-nav">
+        <div className="nv-nav-inner">
+          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
+          <div className="nv-nav-links">
+            <Link href="/search" className="nv-nav-link active">Trajets</Link>
+          </div>
+          <div className="nv-nav-right">
+            <Link href="/agency/login" className="nv-btn nv-btn-secondary nv-btn-sm">Espace Agence</Link>
+          </div>
+        </div>
+      </nav>
 
       {/* HERO SEARCH */}
       <div style={{
@@ -240,3 +252,10 @@ export default function SearchPage() {
     </Suspense>
   )
 }
+`;
+
+const searchDir = path.join('app', 'search');
+if (!fs.existsSync(searchDir)) fs.mkdirSync(searchDir, { recursive: true });
+fs.writeFileSync(path.join(searchDir, 'page.tsx'), searchPage, 'utf8');
+console.log('Written: app/search/page.tsx');
+console.log('Done!');

@@ -2,194 +2,114 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
-
-interface Booking {
-  id: string
-  booking_ref: string
-  status: string
-  created_at: string
-  trips: {
-    origin: string
-    destination: string
-    departure_time: string
-    bus_class: string
-    price: number
-  } | null
-  seats: {
-    seat_number: number
-  } | null
-}
-
-interface Agency {
-  id: string
-  name: string
-}
 
 export default function AgencyBookingsPage() {
   const router = useRouter()
+  const [agency, setAgency] = useState<any>(null)
+  const [bookings, setBookings] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const [agency, setAgency]     = useState<Agency | null>(null)
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [loading, setLoading]   = useState(true)
+  useEffect(() => { checkAuth() }, [])
 
-  useEffect(() => {
-    loadPage()
-  }, [])
-
-  async function loadPage() {
-    setLoading(true)
-
-    // Check auth
+  async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/agency/login'); return }
+    const { data: ag } = await supabase.from('agencies').select('*').eq('user_id', user.id).eq('is_admin', false).single()
+    if (!ag) { router.push('/agency/login'); return }
+    setAgency(ag)
 
-    // Get agency
-    const { data: agencyData } = await supabase
-      .from('agencies')
-      .select('id, name')
-      .eq('user_id', user.id)
-      .single()
+    const { data: trips } = await supabase.from('trips').select('id').eq('agency_id', ag.id)
+    const tripIds = (trips || []).map((t: any) => t.id)
 
-    if (!agencyData) { router.push('/agency/login'); return }
-    setAgency(agencyData)
-
-    // Get all trip IDs for this agency
-    const { data: agencyTrips } = await supabase
-      .from('trips')
-      .select('id')
-      .eq('agency_id', agencyData.id)
-
-    const tripIds = agencyTrips?.map(t => t.id) || []
-
-    if (tripIds.length === 0) {
-      // No trips yet so no bookings
-      setLoading(false)
-      return
+    if (tripIds.length > 0) {
+      const { data } = await supabase
+        .from('bookings')
+        .select('*, trips(origin, destination, departure_time, bus_class, price, agencies(name)), seats(seat_number)')
+        .in('trip_id', tripIds)
+        .eq('status', 'confirmed')
+        .order('created_at', { ascending: false })
+      setBookings(data || [])
     }
-
-    // Get all bookings for those trips, joining trip and seat details
-    const { data: bookingsData } = await supabase
-      .from('bookings')
-      .select(`
-        *,
-        trips (
-          origin,
-          destination,
-          departure_time,
-          bus_class,
-          price
-        ),
-        seats (
-          seat_number
-        )
-      `)
-      .in('trip_id', tripIds)
-      .order('created_at', { ascending: false }) // newest bookings first
-
-    setBookings(bookingsData || [])
     setLoading(false)
   }
 
-  function formatDateTime(dt: string): string {
-    return new Date(dt).toLocaleString('fr-CM', {
-      weekday: 'short', day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit',
-    })
+  function formatDate(dt: string) {
+    return new Date(dt).toLocaleDateString('fr-CM', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
-  function formatPrice(amount: number): string {
-    return new Intl.NumberFormat('fr-CM').format(amount) + ' FCFA'
+  function formatTime(dt: string) {
+    return new Date(dt).toLocaleTimeString('fr-CM', { hour: '2-digit', minute: '2-digit', hour12: false })
   }
 
-  function formatBookingDate(dt: string): string {
-    return new Date(dt).toLocaleString('fr-CM', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading bookings...
-      </div>
-    )
-  }
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div className="nv-spinner nv-spinner-lg" />
+    </div>
+  )
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+    <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
+      <Navbar />
 
-        {/* HEADER */}
-        <div className="mb-6">
-          <button onClick={() => router.push('/agency/dashboard')} className="text-green-600 text-sm mb-1">
-            ← Back to dashboard
-          </button>
-          <h1 className="text-2xl font-bold text-gray-800">Bookings</h1>
-          <p className="text-gray-400 text-sm">{agency?.name} · {bookings.length} total bookings</p>
+      <div className="nv-container" style={{ padding: '40px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
+            Reservations
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--nv-text-secondary)' }}>
+            {bookings.length} reservation{bookings.length !== 1 ? 's' : ''} confirmee{bookings.length !== 1 ? 's' : ''}
+          </p>
         </div>
 
-        {/* NO BOOKINGS */}
         {bookings.length === 0 ? (
-          <div className="text-center py-20">
-            <p className="text-gray-400 text-lg mb-2">No bookings yet</p>
-            <p className="text-gray-300 text-sm">Bookings will appear here once passengers start booking your trips</p>
+          <div className="nv-card" style={{ padding: '48px', textAlign: 'center' }}>
+            <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--nv-gray-900)', marginBottom: '6px' }}>Aucune reservation</div>
+            <div style={{ fontSize: '13px', color: 'var(--nv-text-secondary)' }}>Les reservations de vos passagers apparaitront ici.</div>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            {bookings.map(booking => (
-              <div key={booking.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-
-                {/* BOOKING REF + DATE */}
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    {/* Booking reference in green — easy to match at the bus station */}
-                    <p className="font-bold text-green-600 text-lg tracking-wider">
-                      {booking.booking_ref}
-                    </p>
-                    <p className="text-gray-400 text-xs">
-                      Booked on {formatBookingDate(booking.created_at)}
-                    </p>
-                  </div>
-                  {/* Status badge */}
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    booking.status === 'confirmed'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-red-100 text-red-500'
-                  }`}>
-                    {booking.status}
-                  </span>
-                </div>
-
-                {/* TRIP DETAILS */}
-                {booking.trips && (
-                  <div className="border-t border-gray-50 pt-3">
-                    <p className="font-semibold text-gray-800 mb-1">
-                      {booking.trips.origin} → {booking.trips.destination}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="text-gray-400 text-sm">
-                          {formatDateTime(booking.trips.departure_time)}
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          {booking.trips.bus_class} · Seat {booking.seats?.seat_number ?? '—'}
-                        </p>
-                      </div>
-                      <p className="text-green-600 font-bold">
-                        {formatPrice(booking.trips.price)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-              </div>
-            ))}
+          <div className="nv-card" style={{ padding: '0', overflow: 'hidden' }}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ background: 'var(--nv-gray-50)', borderBottom: '1.5px solid var(--nv-border)' }}>
+                    {['Reference', 'Date reserv.', 'Trajet', 'Depart', 'Classe', 'Siege', 'Prix'].map(h => (
+                      <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'var(--nv-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {bookings.map((b, i) => (
+                    <tr key={b.id} style={{ borderBottom: i < bookings.length - 1 ? '1px solid var(--nv-border)' : 'none' }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span style={{ fontFamily: 'var(--nv-font-display)', fontWeight: 700, color: 'var(--nv-green-600)', fontSize: '13px' }}>{b.booking_ref}</span>
+                      </td>
+                      <td style={{ padding: '14px 16px', color: 'var(--nv-text-secondary)', whiteSpace: 'nowrap' }}>{formatDate(b.created_at)}</td>
+                      <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--nv-gray-900)', whiteSpace: 'nowrap' }}>
+                        {b.trips?.origin} &rarr; {b.trips?.destination}
+                      </td>
+                      <td style={{ padding: '14px 16px', color: 'var(--nv-text-secondary)', whiteSpace: 'nowrap' }}>
+                        {formatDate(b.trips?.departure_time)} {formatTime(b.trips?.departure_time)}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <span className={'nv-badge ' + (b.trips?.bus_class === 'VIP' ? 'nv-badge-vip' : b.trips?.bus_class === 'Classic' ? 'nv-badge-classic' : 'nv-badge-normal')}>
+                          {b.trips?.bus_class}
+                        </span>
+                      </td>
+                      <td style={{ padding: '14px 16px', color: 'var(--nv-text-secondary)' }}>N{b.seats?.seat_number}</td>
+                      <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--nv-green-600)', whiteSpace: 'nowrap' }}>
+                        {b.trips?.price?.toLocaleString('fr-CM')} FCFA
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
-
       </div>
-    </main>
+    </div>
   )
 }

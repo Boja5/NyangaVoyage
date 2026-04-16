@@ -1,4 +1,47 @@
-'use client'
+const fs = require('fs');
+
+// Add mobile CSS to globals.css
+let css = fs.readFileSync('app/globals.css', 'utf8');
+
+const mobileCss = `
+/* ============================================================
+   MOBILE RESPONSIVE — Added for clean mobile experience
+   ============================================================ */
+
+@media (max-width: 768px) {
+  :root { --nv-max-width: 100%; }
+
+  .nv-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .nv-section { padding-top: 40px; padding-bottom: 40px; }
+  .nv-section-sm { padding-top: 28px; padding-bottom: 28px; }
+
+  .nv-nav-links { display: none; }
+
+  .nv-nav-inner {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .nv-nav-logo { font-size: 18px; }
+
+  .nv-trip-card { flex-wrap: wrap; }
+
+  .nv-footer-inner { flex-direction: column; gap: 8px; }
+}
+`;
+
+if (!css.includes('MOBILE RESPONSIVE')) {
+  css = css + mobileCss;
+  fs.writeFileSync('app/globals.css', css, 'utf8');
+  console.log('Updated: app/globals.css with mobile CSS');
+}
+
+// Now rewrite page.tsx with full mobile support
+const homePage = `'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -377,3 +420,8 @@ export default function HomePage() {
     </div>
   )
 }
+`;
+
+fs.writeFileSync('app/page.tsx', homePage, 'utf8');
+console.log('Written: app/page.tsx with full mobile support');
+console.log('Done!');

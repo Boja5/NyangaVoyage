@@ -1,172 +1,73 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
-interface Agency {
-  id: string
-  name: string
-  phone: string | null
-  user_id: string | null
-  is_admin: boolean
-}
-
-interface Booking {
-  id: string
-  booking_ref: string
-  status: string
-  created_at: string
-  trips: {
-    origin: string
-    destination: string
-    departure_time: string
-    bus_class: string
-    price: number
-    agencies: { name: string } | null
-  } | null
-  seats: { seat_number: number } | null
-}
-
-interface Stats {
-  totalAgencies: number
-  totalTrips: number
-  totalBookings: number
-  totalRevenue: number
-}
-
-export default function AdminDashboard() {
+export default function AdminDashboardPage() {
   const router = useRouter()
+  const [tab, setTab] = useState<'overview' | 'agencies' | 'bookings'>('overview')
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({ agencies: 0, trips: 0, bookings: 0, revenue: 0 })
+  const [agencies, setAgencies] = useState<any[]>([])
+  const [bookings, setBookings] = useState<any[]>([])
+  const [newAgency, setNewAgency] = useState({ name: '', email: '', password: '', phone: '' })
+  const [savingAgency, setSavingAgency] = useState(false)
+  const [agencyMsg, setAgencyMsg] = useState('')
 
-  const [stats, setStats]           = useState<Stats>({ totalAgencies: 0, totalTrips: 0, totalBookings: 0, totalRevenue: 0 })
-  const [agencies, setAgencies]     = useState<Agency[]>([])
-  const [bookings, setBookings]     = useState<Booking[]>([])
-  const [loading, setLoading]       = useState(true)
-  const [activeTab, setActiveTab]   = useState<'overview' | 'agencies' | 'bookings'>('overview')
+  useEffect(() => { checkAuth() }, [])
 
-  // Add agency form state
-  const [showAddForm, setShowAddForm]   = useState(false)
-  const [newName, setNewName]           = useState('')
-  const [newEmail, setNewEmail]         = useState('')
-  const [newPassword, setNewPassword]   = useState('')
-  const [newPhone, setNewPhone]         = useState('')
-  const [addError, setAddError]         = useState('')
-  const [addSuccess, setAddSuccess]     = useState('')
-  const [adding, setAdding]             = useState(false)
-
-  useEffect(() => {
-    loadDashboard()
-  }, [])
-
-  async function loadDashboard() {
-    setLoading(true)
-
-    // Check auth
+  async function checkAuth() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/admin/login'); return }
-
-    // Verify admin
-    const { data: adminRecord } = await supabase
-      .from('agencies')
-      .select('is_admin')
-      .eq('user_id', user.id)
-      .eq('is_admin', true)
-      .single()
-
+    const { data: adminRecord } = await supabase.from('agencies').select('*').eq('user_id', user.id).eq('is_admin', true).single()
     if (!adminRecord) { router.push('/admin/login'); return }
+    loadData()
+  }
 
-    // Load all real agencies (not admin record)
-    const { data: agenciesData } = await supabase
-      .from('agencies')
-      .select('*')
-      .eq('is_admin', false)
-      .order('name', { ascending: true })
+  async function loadData() {
+    const [{ data: agList }, { data: tripList }, { data: bookList }] = await Promise.all([
+      supabase.from('agencies').select('*').eq('is_admin', false),
+      supabase.from('trips').select('id'),
+      supabase.from('bookings').select('*, trips(price)').eq('status', 'confirmed'),
+    ])
 
-    setAgencies(agenciesData || [])
-
-    // Count total trips
-    const { count: tripCount } = await supabase
-      .from('trips')
-      .select('*', { count: 'exact', head: true })
-
-    // Count total bookings and calculate revenue
-    const { data: allBookings } = await supabase
-      .from('bookings')
-      .select(`
-        *,
-        trips (
-          origin, destination, departure_time, bus_class, price,
-          agencies ( name )
-        ),
-        seats ( seat_number )
-      `)
-      .eq('status', 'confirmed')
-      .order('created_at', { ascending: false })
-
-    setBookings(allBookings || [])
-
-    // Calculate total revenue
-    const revenue = (allBookings || []).reduce((sum, b) => {
-      return sum + (b.trips?.price || 0)
-    }, 0)
-
-    setStats({
-      totalAgencies: agenciesData?.length || 0,
-      totalTrips: tripCount || 0,
-      totalBookings: allBookings?.length || 0,
-      totalRevenue: revenue,
-    })
-
+    const revenue = (bookList || []).reduce((s: number, b: any) => s + (b.trips?.price || 0), 0)
+    setStats({ agencies: agList?.length || 0, trips: tripList?.length || 0, bookings: bookList?.length || 0, revenue })
+    setAgencies(agList || [])
+    setBookings(bookList || [])
     setLoading(false)
   }
 
-  async function handleAddAgency() {
-    if (!newName.trim())     { setAddError('Please enter agency name.'); return }
-    if (!newEmail.trim())    { setAddError('Please enter agency email.'); return }
-    if (!newPassword.trim()) { setAddError('Please enter a password.'); return }
+  async function handleAddAgency(e: React.FormEvent) {
+    e.preventDefault()
+    setSavingAgency(true)
+    setAgencyMsg('')
 
-    setAddError('')
-    setAdding(true)
-
-    // Step 1: Create the auth user for this agency using Supabase Admin API
-    // We use signUp here — in production you'd use the admin API
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: newEmail.trim(),
-      password: newPassword.trim(),
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: newAgency.email,
+      password: newAgency.password,
     })
 
-    if (signUpError || !signUpData.user) {
-      setAddError('Failed to create login: ' + (signUpError?.message || 'unknown error'))
-      setAdding(false)
+    if (authError || !authData.user) {
+      setAgencyMsg('Erreur: ' + (authError?.message || 'Impossible de creer le compte.'))
+      setSavingAgency(false)
       return
     }
 
-    // Step 2: Insert the agency record linked to the new auth user
-    const { error: insertError } = await supabase
-      .from('agencies')
-      .insert({
-        name:    newName.trim(),
-        phone:   newPhone.trim() || null,
-        user_id: signUpData.user.id,
-        is_admin: false,
-      })
+    await supabase.from('agencies').insert({
+      name: newAgency.name,
+      phone: newAgency.phone,
+      user_id: authData.user.id,
+      is_admin: false,
+    })
 
-    if (insertError) {
-      setAddError('Failed to create agency: ' + insertError.message)
-      setAdding(false)
-      return
-    }
-
-    // Success — reset form and reload
-    setAddSuccess(`Agency "${newName}" created successfully!`)
-    setShowAddForm(false)
-    setNewName('')
-    setNewEmail('')
-    setNewPassword('')
-    setNewPhone('')
-    setAdding(false)
-    await loadDashboard()
-    setTimeout(() => setAddSuccess(''), 4000)
+    setAgencyMsg('Agence ' + newAgency.name + ' ajoutee avec succes !')
+    setNewAgency({ name: '', email: '', password: '', phone: '' })
+    setSavingAgency(false)
+    loadData()
   }
 
   async function handleLogout() {
@@ -174,256 +75,183 @@ export default function AdminDashboard() {
     router.push('/admin/login')
   }
 
-  function formatPrice(amount: number): string {
-    return new Intl.NumberFormat('fr-CM').format(amount) + ' FCFA'
+  function formatDate(dt: string) {
+    return new Date(dt).toLocaleDateString('fr-CM', { day: 'numeric', month: 'short', year: 'numeric' })
   }
 
-  function formatDateTime(dt: string): string {
-    return new Date(dt).toLocaleString('fr-CM', {
-      day: 'numeric', month: 'short', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
-  }
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+      <div className="nv-spinner nv-spinner-lg" />
+    </div>
+  )
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400">
-        Loading admin panel...
-      </div>
-    )
-  }
+  const tabStyle = (t: string): React.CSSProperties => ({
+    padding: '10px 20px',
+    border: 'none',
+    borderBottom: tab === t ? '2.5px solid var(--nv-green-600)' : '2.5px solid transparent',
+    background: 'transparent',
+    fontFamily: 'var(--nv-font-body)',
+    fontSize: '14px',
+    fontWeight: tab === t ? 600 : 400,
+    color: tab === t ? 'var(--nv-green-600)' : 'var(--nv-text-secondary)',
+    cursor: 'pointer',
+    transition: 'all 150ms ease',
+  })
 
   return (
-    <main className="min-h-screen bg-gray-50 px-4 py-8">
-      <div className="max-w-3xl mx-auto">
+    <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
+      <Navbar />
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-8">
+      <div className="nv-container" style={{ padding: '40px' }}>
+        <div style={{ marginBottom: '28px' }}>
+          <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
+            Panneau d'administration
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--nv-text-secondary)' }}>Gestion de la plateforme NyangaVoyage</p>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: '1.5px solid var(--nv-border)', marginBottom: '32px' }}>
+          <button style={tabStyle('overview')} onClick={() => setTab('overview')}>Vue d'ensemble</button>
+          <button style={tabStyle('agencies')} onClick={() => setTab('agencies')}>Agences ({stats.agencies})</button>
+          <button style={tabStyle('bookings')} onClick={() => setTab('bookings')}>Reservations ({stats.bookings})</button>
+        </div>
+
+        {/* OVERVIEW TAB */}
+        {tab === 'overview' && (
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Admin Panel</h1>
-            <p className="text-gray-400 text-sm">NyangaVoyage — Full Overview</p>
-          </div>
-          <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-red-500 transition">
-            Sign Out
-          </button>
-        </div>
-
-        {/* STATS */}
-        <div className="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-green-600 mb-1">{stats.totalAgencies}</p>
-            <p className="text-gray-400 text-xs">Agencies</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-blue-500 mb-1">{stats.totalTrips}</p>
-            <p className="text-gray-400 text-xs">Trips</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-            <p className="text-3xl font-bold text-purple-500 mb-1">{stats.totalBookings}</p>
-            <p className="text-gray-400 text-xs">Bookings</p>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 text-center">
-            <p className="text-lg font-bold text-yellow-500 mb-1">{formatPrice(stats.totalRevenue)}</p>
-            <p className="text-gray-400 text-xs">Revenue</p>
-          </div>
-        </div>
-
-        {/* TABS */}
-        <div className="flex gap-2 mb-6">
-          {(['overview', 'agencies', 'bookings'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                activeTab === tab
-                  ? 'bg-green-600 text-white'
-                  : 'bg-white text-gray-500 border border-gray-200'
-              }`}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* ── OVERVIEW TAB ── */}
-        {activeTab === 'overview' && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-800 mb-4">Platform Summary</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Total agencies</span>
-                <span className="font-semibold text-gray-800">{stats.totalAgencies}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Active trips in database</span>
-                <span className="font-semibold text-gray-800">{stats.totalTrips}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Confirmed bookings</span>
-                <span className="font-semibold text-gray-800">{stats.totalBookings}</span>
-              </div>
-              <div className="flex justify-between text-sm border-t pt-3">
-                <span className="text-gray-500">Total platform revenue</span>
-                <span className="font-bold text-green-600">{formatPrice(stats.totalRevenue)}</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── AGENCIES TAB ── */}
-        {activeTab === 'agencies' && (
-          <div>
-
-            {/* SUCCESS MESSAGE */}
-            {addSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4 text-sm">
-                ✓ {addSuccess}
-              </div>
-            )}
-
-            {/* ADD AGENCY BUTTON */}
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-gray-500 text-sm">{agencies.length} agencies registered</p>
-              <button
-                onClick={() => { setShowAddForm(!showAddForm); setAddError('') }}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-xl text-sm transition"
-              >
-                {showAddForm ? 'Cancel' : '+ Add Agency'}
-              </button>
-            </div>
-
-            {/* ADD AGENCY FORM */}
-            {showAddForm && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-                <h3 className="font-bold text-gray-800 mb-4">Add New Agency</h3>
-
-                <div className="mb-4">
-                  <label className="block text-sm text-gray-600 mb-1 font-medium">Agency Name</label>
-                  <input
-                    type="text"
-                    value={newName}
-                    onChange={e => setNewName(e.target.value)}
-                    placeholder="e.g. Express Voyages"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm text-gray-600 mb-1 font-medium">Phone (optional)</label>
-                  <input
-                    type="tel"
-                    value={newPhone}
-                    onChange={e => setNewPhone(e.target.value)}
-                    placeholder="e.g. 6XX XXX XXX"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-                  />
-                </div>
-
-                <div className="mb-4">
-                  <label className="block text-sm text-gray-600 mb-1 font-medium">Login Email</label>
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={e => setNewEmail(e.target.value)}
-                    placeholder="e.g. express@nyangavoyage.com"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-                  />
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm text-gray-600 mb-1 font-medium">Login Password</label>
-                  <input
-                    type="text"
-                    value={newPassword}
-                    onChange={e => setNewPassword(e.target.value)}
-                    placeholder="Create a strong password"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    Share this email and password with the agency so they can log in
-                  </p>
-                </div>
-
-                {addError && (
-                  <p className="text-red-500 text-sm mb-4">{addError}</p>
-                )}
-
-                <button
-                  onClick={handleAddAgency}
-                  disabled={adding}
-                  className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-semibold py-3 rounded-xl transition"
-                >
-                  {adding ? 'Creating...' : 'Create Agency'}
-                </button>
-              </div>
-            )}
-
-            {/* AGENCIES LIST */}
-            <div className="flex flex-col gap-3">
-              {agencies.map(agency => (
-                <div key={agency.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-gray-800">{agency.name}</p>
-                      <p className="text-gray-400 text-sm">{agency.phone || 'No phone'}</p>
-                    </div>
-                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                      agency.user_id
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {agency.user_id ? 'Active' : 'No login'}
-                    </span>
-                  </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+              {[
+                { label: 'Agences partenaires', value: stats.agencies, color: 'var(--nv-green-600)' },
+                { label: 'Trajets programmes', value: stats.trips, color: '#2563eb' },
+                { label: 'Reservations confirmees', value: stats.bookings, color: 'var(--nv-gold-600)' },
+                { label: 'Revenus totaux (FCFA)', value: stats.revenue.toLocaleString('fr-CM'), color: 'var(--nv-green-700)' },
+              ].map((s, i) => (
+                <div key={i} className="nv-card" style={{ padding: '24px' }}>
+                  <div style={{ fontSize: '13px', color: 'var(--nv-text-secondary)', marginBottom: '8px' }}>{s.label}</div>
+                  <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '28px', fontWeight: 700, color: s.color }}>{s.value}</div>
                 </div>
               ))}
             </div>
-
           </div>
         )}
 
-        {/* ── BOOKINGS TAB ── */}
-        {activeTab === 'bookings' && (
-          <div className="flex flex-col gap-4">
+        {/* AGENCIES TAB */}
+        {tab === 'agencies' && (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', alignItems: 'start' }}>
+              {/* Agency list */}
+              <div>
+                <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
+                  Agences enregistrees
+                </h2>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {agencies.map(ag => (
+                    <div key={ag.id} className="nv-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, color: 'var(--nv-gray-900)', fontSize: '15px' }}>{ag.name}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--nv-text-secondary)', marginTop: '2px' }}>{ag.phone || 'Pas de telephone'}</div>
+                      </div>
+                      <span className={'nv-badge ' + (ag.user_id ? 'nv-badge-green' : 'nv-badge-gray')}>
+                        {ag.user_id ? 'Actif' : 'Inactif'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Add agency form */}
+              <div>
+                <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
+                  Ajouter une agence
+                </h2>
+                <div className="nv-card" style={{ padding: '24px' }}>
+                  <form onSubmit={handleAddAgency} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div className="nv-form-group">
+                      <label className="nv-label">Nom de l'agence</label>
+                      <input type="text" className="nv-input" placeholder="Ex: Express Voyages" value={newAgency.name} onChange={e => setNewAgency({...newAgency, name: e.target.value})} required />
+                    </div>
+                    <div className="nv-form-group">
+                      <label className="nv-label">Email</label>
+                      <input type="email" className="nv-input" placeholder="agence@email.com" value={newAgency.email} onChange={e => setNewAgency({...newAgency, email: e.target.value})} required />
+                    </div>
+                    <div className="nv-form-group">
+                      <label className="nv-label">Mot de passe initial</label>
+                      <input type="password" className="nv-input" placeholder="Min. 6 caracteres" value={newAgency.password} onChange={e => setNewAgency({...newAgency, password: e.target.value})} required minLength={6} />
+                    </div>
+                    <div className="nv-form-group">
+                      <label className="nv-label">Telephone</label>
+                      <input type="tel" className="nv-input" placeholder="+237 6XXXXXXXX" value={newAgency.phone} onChange={e => setNewAgency({...newAgency, phone: e.target.value})} />
+                    </div>
+                    {agencyMsg && (
+                      <div className={'nv-alert ' + (agencyMsg.includes('Erreur') ? 'nv-alert-error' : 'nv-alert-success')}>
+                        <div style={{ fontSize: '13px' }}>{agencyMsg}</div>
+                      </div>
+                    )}
+                    <button type="submit" className="nv-btn nv-btn-primary nv-btn-full" disabled={savingAgency}>
+                      {savingAgency ? 'Enregistrement...' : 'Ajouter l agence'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* BOOKINGS TAB */}
+        {tab === 'bookings' && (
+          <div>
+            <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
+              Toutes les reservations
+            </h2>
             {bookings.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-gray-400">No bookings yet across the platform</p>
+              <div className="nv-card" style={{ padding: '48px', textAlign: 'center' }}>
+                <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--nv-gray-900)' }}>Aucune reservation</div>
               </div>
             ) : (
-              bookings.map(booking => (
-                <div key={booking.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <p className="font-bold text-green-600 tracking-wider">{booking.booking_ref}</p>
-                      <p className="text-gray-400 text-xs">{formatDateTime(booking.created_at)}</p>
-                    </div>
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700">
-                      {booking.status}
-                    </span>
-                  </div>
-                  {booking.trips && (
-                    <div className="border-t border-gray-50 pt-3">
-                      <p className="font-semibold text-gray-800 mb-1">
-                        {booking.trips.origin} → {booking.trips.destination}
-                      </p>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p className="text-gray-400 text-sm">{booking.trips.agencies?.name}</p>
-                          <p className="text-gray-400 text-sm">
-                            {booking.trips.bus_class} · Seat {booking.seats?.seat_number ?? '—'}
-                          </p>
-                        </div>
-                        <p className="text-green-600 font-bold">{formatPrice(booking.trips.price)}</p>
-                      </div>
-                    </div>
-                  )}
+              <div className="nv-card" style={{ padding: '0', overflow: 'hidden' }}>
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                    <thead>
+                      <tr style={{ background: 'var(--nv-gray-50)', borderBottom: '1.5px solid var(--nv-border)' }}>
+                        {['Reference', 'Date', 'Trajet', 'Classe', 'Prix', 'Statut'].map(h => (
+                          <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: 600, color: 'var(--nv-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookings.map((b, i) => (
+                        <tr key={b.id} style={{ borderBottom: i < bookings.length - 1 ? '1px solid var(--nv-border)' : 'none' }}>
+                          <td style={{ padding: '14px 16px' }}>
+                            <span style={{ fontFamily: 'var(--nv-font-display)', fontWeight: 700, color: 'var(--nv-green-600)', fontSize: '13px' }}>{b.booking_ref}</span>
+                          </td>
+                          <td style={{ padding: '14px 16px', color: 'var(--nv-text-secondary)', whiteSpace: 'nowrap' }}>{formatDate(b.created_at)}</td>
+                          <td style={{ padding: '14px 16px', fontWeight: 600, color: 'var(--nv-gray-900)', whiteSpace: 'nowrap' }}>
+                            {b.trips?.origin} &rarr; {b.trips?.destination}
+                          </td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <span className={'nv-badge ' + (b.trips?.bus_class === 'VIP' ? 'nv-badge-vip' : b.trips?.bus_class === 'Classic' ? 'nv-badge-classic' : 'nv-badge-normal')}>
+                              {b.trips?.bus_class}
+                            </span>
+                          </td>
+                          <td style={{ padding: '14px 16px', fontWeight: 700, color: 'var(--nv-green-600)', whiteSpace: 'nowrap' }}>
+                            {b.trips?.price?.toLocaleString('fr-CM')} FCFA
+                          </td>
+                          <td style={{ padding: '14px 16px' }}>
+                            <span className="nv-badge nv-badge-green">Confirme</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))
+              </div>
             )}
           </div>
         )}
-
       </div>
-    </main>
+    </div>
   )
 }
+
+

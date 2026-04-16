@@ -2,107 +2,90 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 import { supabase } from '@/lib/supabase'
 
 export default function AdminLoginPage() {
   const router = useRouter()
-
-  const [email, setEmail]       = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  async function handleLogin() {
-    if (!email.trim())    { setError('Please enter your email.'); return }
-    if (!password.trim()) { setError('Please enter your password.'); return }
-
-    setError('')
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
     setLoading(true)
+    setError('')
 
-    // Sign in with Supabase Auth
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password.trim(),
-    })
-
-    if (authError || !data.user) {
-      setError('Invalid email or password.')
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    if (authError || !authData.user) {
+      setError('Email ou mot de passe incorrect.')
       setLoading(false)
       return
     }
 
-    // Check this user is actually the admin
     const { data: adminRecord } = await supabase
       .from('agencies')
-      .select('is_admin')
-      .eq('user_id', data.user.id)
+      .select('*')
+      .eq('user_id', authData.user.id)
       .eq('is_admin', true)
       .single()
 
     if (!adminRecord) {
-      setError('You do not have admin access.')
+      setError('Acces administrateur refuse.')
       await supabase.auth.signOut()
       setLoading(false)
       return
     }
 
-    // Success — go to admin dashboard
     router.push('/admin/dashboard')
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)', display: 'flex', flexDirection: 'column' }}>
+      <Navbar />
 
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-green-700 mb-1">NyangaVoyage</h1>
-          <p className="text-gray-500 text-sm">Admin Panel</p>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Admin Sign In</h2>
-
-          <div className="mb-4">
-            <label className="block text-sm text-gray-600 mb-1 font-medium">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="admin@nyangavoyage.com"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-            />
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ width: '100%', maxWidth: '420px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'var(--nv-gray-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontFamily: 'var(--nv-font-display)', fontSize: '22px', fontWeight: 800, color: '#fff' }}>S</div>
+            <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '24px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '6px' }}>
+              Acces Administrateur
+            </h1>
+            <p style={{ fontSize: '14px', color: 'var(--nv-text-secondary)' }}>
+              Panneau de gestion NyangaVoyage
+            </p>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm text-gray-600 mb-1 font-medium">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-400"
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-            />
+          <div className="nv-card" style={{ padding: '32px' }}>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+              <div className="nv-form-group">
+                <label className="nv-label">Adresse email</label>
+                <input type="email" className="nv-input" placeholder="admin@nyangavoyage.com" value={email} onChange={e => setEmail(e.target.value)} required />
+              </div>
+              <div className="nv-form-group">
+                <label className="nv-label">Mot de passe</label>
+                <input type="password" className="nv-input" placeholder="Mot de passe admin" value={password} onChange={e => setPassword(e.target.value)} required />
+              </div>
+              {error && (
+                <div className="nv-alert nv-alert-error">
+                  <div style={{ fontSize: '13px' }}>{error}</div>
+                </div>
+              )}
+              <button type="submit" className="nv-btn nv-btn-primary nv-btn-full nv-btn-lg" disabled={loading}>
+                {loading ? 'Connexion...' : 'Se connecter'}
+              </button>
+            </form>
           </div>
 
-          {error && (
-            <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
-          )}
-
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-semibold py-3 rounded-xl transition"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
+          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: 'var(--nv-text-secondary)' }}>
+            <Link href="/agency/login" style={{ color: 'var(--nv-green-600)', fontWeight: 600 }}>
+              Retour espace agence
+            </Link>
+          </div>
         </div>
-
-        <p className="text-center text-sm text-gray-400 mt-6">
-          <a href="/" className="text-green-600 hover:underline">← Back to passenger app</a>
-        </p>
-
       </div>
-    </main>
+    </div>
   )
 }

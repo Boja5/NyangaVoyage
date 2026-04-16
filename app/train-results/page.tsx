@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Navbar from '@/components/Navbar'
 
 type TrainRoute = {
   from: string
@@ -100,14 +101,7 @@ function TrainResultsInner() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
 
       {/* NAVBAR */}
-      <nav className="nv-nav">
-        <div className="nv-nav-inner">
-          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
-          <div className="nv-nav-right">
-            <Link href="/agency/login" className="nv-btn nv-btn-secondary nv-btn-sm">Espace Agence</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* PAGE HEADER */}
       <div style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', padding: '24px 0' }}>
