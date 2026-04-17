@@ -109,7 +109,7 @@ export default function HomePage() {
           <a href="/" className="nv-nav-logo">NyangaVoyage</a>
           <div className="nv-nav-links">
             <a href="/search" className="nv-nav-link">{t.nav.routes}</a>
-            <span className="nv-nav-link">{t.nav.agencies}</span>
+            <Link href="/agencies" className="nv-nav-link">{t.nav.agencies}</Link>
           </div>
           <div className="nv-nav-right">
             <div className="nv-lang-toggle">

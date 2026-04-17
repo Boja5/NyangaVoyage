@@ -53,6 +53,9 @@ export default function Navbar() {
           <Link href="/search" className={'nv-nav-link' + (pathname === '/search' ? ' active' : '')}>
             {lang === 'fr' ? 'Trajets' : 'Routes'}
           </Link>
+          <Link href="/agencies" className={'nv-nav-link' + (pathname === '/agencies' ? ' active' : '')}>
+            {lang === 'fr' ? 'Agences' : 'Agencies'}
+          </Link>
         </div>
         <div className="nv-nav-right">
           <div className="nv-lang-toggle">
