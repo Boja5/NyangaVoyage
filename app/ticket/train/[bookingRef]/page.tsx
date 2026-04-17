@@ -41,7 +41,7 @@ export default function TrainTicketPage({ params }: { params: Promise<{ bookingR
         </div>
       </nav>
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
 
           <div className="nv-alert nv-alert-success" style={{ marginBottom: '24px', padding: '16px 20px' }}>

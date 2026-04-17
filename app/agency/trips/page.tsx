@@ -83,7 +83,7 @@ export default function AgencyTripsPage() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
       <Navbar />
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
@@ -105,7 +105,7 @@ export default function AgencyTripsPage() {
               Nouveau trajet
             </h2>
             <form onSubmit={handleAddTrip}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '16px' }}>
                 <div className="nv-form-group">
                   <label className="nv-label">Ville de depart</label>
                   <select className="nv-select" value={form.origin} onChange={e => setForm({...form, origin: e.target.value})} required>

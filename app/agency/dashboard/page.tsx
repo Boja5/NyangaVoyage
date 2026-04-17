@@ -60,7 +60,7 @@ export default function AgencyDashboardPage() {
 
       <Navbar />
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
             Bonjour, {agency?.name}

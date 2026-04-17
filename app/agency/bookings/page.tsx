@@ -54,7 +54,7 @@ export default function AgencyBookingsPage() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
       <Navbar />
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
             Reservations

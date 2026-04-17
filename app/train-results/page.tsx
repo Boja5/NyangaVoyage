@@ -131,7 +131,7 @@ function TrainResultsInner() {
       </div>
 
       {/* RESULTS */}
-      <div className="nv-container" style={{ padding: '32px 40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 40px)' }}>
         {filteredRoutes.length === 0 ? (
           <div className="nv-card" style={{ padding: '48px', textAlign: 'center', maxWidth: '500px', margin: '0 auto' }}>
             <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '8px' }}>

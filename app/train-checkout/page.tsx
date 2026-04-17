@@ -109,8 +109,8 @@ function TrainCheckoutInner() {
         </div>
       </div>
 
-      <div className="nv-container" style={{ padding: '32px 40px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px', alignItems: 'start' }}>
+      <div className="nv-container" style={{ padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 40px)' }}>
+        <div className='nv-checkout-layout' style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '32px', alignItems: 'start' }}>
 
           {/* FORM */}
           <div>
@@ -184,7 +184,7 @@ function TrainCheckoutInner() {
           </div>
 
           {/* ORDER SUMMARY */}
-          <div style={{ position: 'sticky', top: '80px' }}>
+          <div className='nv-checkout-summary' style={{ position: 'sticky', top: '80px' }}>
             <div className="nv-card" style={{ padding: '24px', marginBottom: '16px' }}>
               <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--nv-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px' }}>
                 Recapitulatif Camrail

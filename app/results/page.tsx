@@ -153,10 +153,10 @@ function ResultsInner() {
         </div>
       </div>
 
-      <div className="nv-container" style={{ padding: '32px 40px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '32px', alignItems: 'start' }}>
+      <div className="nv-container" style={{ padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 40px)' }}>
+        <div className='nv-results-layout' style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '32px', alignItems: 'start' }}>
 
-          <div className="nv-card" style={{ padding: '20px', position: 'sticky', top: '80px' }}>
+          <div className="nv-card nv-time-filter-sidebar" style={{ padding: '20px', position: 'sticky', top: '80px' }}>
             <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--nv-gray-900)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {isFr ? 'Horaires' : 'Schedule'}
             </div>

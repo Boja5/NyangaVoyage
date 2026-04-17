@@ -89,7 +89,7 @@ export default function SeatsPage({ params }: { params: Promise<{ id: string }> 
       const newSeats = Array.from({ length: layout.total }, (_, i) => ({
         trip_id: tripId,
         seat_number: i + 1,
-        status: 'available',
+        status: (i + 1 <= 3) ? 'booked' : 'available',
         locked_until: null,
         locked_by: null,
       }))
@@ -208,8 +208,8 @@ export default function SeatsPage({ params }: { params: Promise<{ id: string }> 
         </div>
       </div>
 
-      <div className="nv-container" style={{ padding: '32px 40px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '32px', alignItems: 'start' }}>
+      <div className="nv-container" style={{ padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 40px)' }}>
+        <div className='nv-seats-layout' style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '32px', alignItems: 'start' }}>
 
           {/* SEAT MAP */}
           <div>
@@ -381,7 +381,7 @@ export default function SeatsPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* SIDEBAR */}
-          <div style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className='nv-seat-sidebar' style={{ position: 'sticky', top: '80px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
             {selectedSeat ? (
               <div className="nv-card" style={{ padding: '24px' }}>

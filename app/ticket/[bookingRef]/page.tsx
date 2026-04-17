@@ -101,7 +101,7 @@ export default function TicketPage({ params }: { params: Promise<{ bookingRef: s
         </div>
       </nav>
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
 
           {/* Success banner */}
@@ -171,7 +171,7 @@ export default function TicketPage({ params }: { params: Promise<{ bookingRef: s
             </div>
 
             {/* Details grid */}
-            <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', borderBottom: '1.5px solid var(--nv-border)' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1.5px solid var(--nv-border)' }}>
               {[
                 { label: 'Passager', value: passengerName || 'N/A' },
                 { label: 'Telephone', value: '+237 ' + (passengerPhone || 'N/A') },

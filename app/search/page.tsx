@@ -111,7 +111,7 @@ function SearchInner() {
             </div>
 
             <div style={{ padding: '28px 32px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr auto', gap: '14px', alignItems: 'end' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '14px', alignItems: 'end' }}>
                 <div className="nv-form-group">
                   <label className="nv-label">{mode === 'bus' ? 'Ville de depart' : 'Gare de depart'}</label>
                   <select className="nv-select" value={from} onChange={e => setFrom(e.target.value)}>
@@ -177,7 +177,7 @@ function SearchInner() {
           <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '20px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '20px' }}>
             Trajets populaires
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
             {[
               { from: 'Yaounde', to: 'Douala', price: 3500, time: '4h' },
               { from: 'Douala', to: 'Bamenda', price: 4500, time: '5h30' },

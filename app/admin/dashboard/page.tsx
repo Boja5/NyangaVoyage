@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
       <Navbar />
 
-      <div className="nv-container" style={{ padding: '40px' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
         <div style={{ marginBottom: '28px' }}>
           <h1 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '28px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '4px' }}>
             Panneau d'administration
@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
         {/* OVERVIEW TAB */}
         {tab === 'overview' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
               {[
                 { label: 'Agences partenaires', value: stats.agencies, color: 'var(--nv-green-600)' },
                 { label: 'Trajets programmes', value: stats.trips, color: '#2563eb' },
@@ -139,7 +139,7 @@ export default function AdminDashboardPage() {
         {/* AGENCIES TAB */}
         {tab === 'agencies' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', alignItems: 'start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'start' }}>
               {/* Agency list */}
               <div>
                 <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '18px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
