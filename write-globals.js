@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
+const fs = require('fs');
+
+const css = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
 /* ============================================================
    NYANGAVOYAGE DESIGN SYSTEM
@@ -253,29 +255,18 @@ button { font-family: var(--nv-font-body); }
   font-family: var(--nv-font-body);
   font-size: 14px;
   font-weight: 400;
-  /* Force visible text on ALL browsers including mobile Chrome/Safari/Samsung */
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  opacity: 1 !important;
-  background: #ffffff !important;
-  background-color: #ffffff !important;
-  -webkit-background-clip: padding-box !important;
-  background-clip: padding-box !important;
-  caret-color: #111827 !important;
+  color: var(--nv-gray-900) !important;
+  -webkit-text-fill-color: var(--nv-gray-900) !important;
+  background-color: var(--nv-bg-surface) !important;
   transition: border-color 150ms ease, box-shadow 150ms ease;
   appearance: none;
   -webkit-appearance: none;
-  -moz-appearance: none;
   outline: none;
 }
 .nv-input::placeholder {
-  color: #9ca3af !important;
-  -webkit-text-fill-color: #9ca3af !important;
-  opacity: 1 !important;
+  color: var(--nv-text-muted);
+  -webkit-text-fill-color: var(--nv-text-muted) !important;
 }
-.nv-input::-webkit-input-placeholder { color: #9ca3af !important; opacity: 1 !important; }
-.nv-input::-moz-placeholder { color: #9ca3af !important; opacity: 1 !important; }
-.nv-input:-ms-input-placeholder { color: #9ca3af !important; opacity: 1 !important; }
 .nv-input:focus, .nv-select:focus {
   border-color: var(--nv-green-500);
   box-shadow: 0 0 0 3px rgba(34,197,94,0.12);
@@ -283,23 +274,15 @@ button { font-family: var(--nv-font-body); }
 .nv-input-error { border-color: #f87171 !important; }
 .nv-error-msg { font-size: 12px; color: #dc2626; margin-top: 2px; }
 
-/* Fix autofill background on ALL mobile browsers */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active,
+/* Fix autofill background on mobile Chrome/Safari */
 .nv-input:-webkit-autofill,
 .nv-input:-webkit-autofill:hover,
 .nv-input:-webkit-autofill:focus,
-.nv-input:-webkit-autofill:active,
 .nv-select:-webkit-autofill {
-  -webkit-text-fill-color: #111827 !important;
-  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-  box-shadow: 0 0 0px 1000px #ffffff inset !important;
-  background-color: #ffffff !important;
-  color: #111827 !important;
-  caret-color: #111827 !important;
-  transition: background-color 5000s ease-in-out 0s !important;
+  -webkit-text-fill-color: var(--nv-gray-900) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--nv-bg-surface) inset !important;
+  box-shadow: 0 0 0px 1000px var(--nv-bg-surface) inset !important;
+  caret-color: var(--nv-gray-900) !important;
 }
 
 .nv-select {
@@ -443,35 +426,7 @@ input:-webkit-autofill:active,
   .nv-btn-lg  { padding: 12px 20px !important; font-size: 15px !important; }
   .nv-input, .nv-select { font-size: 16px !important; } /* prevents iOS zoom */
 }
+`;
 
-/* ============================================================
-   GLOBAL INPUT TEXT VISIBILITY FIX — All browsers / mobile
-   ============================================================ */
-input, select, textarea {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  opacity: 1 !important;
-  background-color: #ffffff !important;
-}
-input::placeholder, textarea::placeholder {
-  color: #9ca3af !important;
-  -webkit-text-fill-color: #9ca3af !important;
-  opacity: 1 !important;
-}
-input:focus, select:focus, textarea:focus {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  background-color: #ffffff !important;
-}
-/* Samsung Internet / older Android browsers */
-input[type="text"],
-input[type="tel"],
-input[type="email"],
-input[type="number"],
-input[type="password"],
-input[type="date"] {
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  background-color: #ffffff !important;
-  opacity: 1 !important;
-}
+fs.writeFileSync('app/globals.css', css, 'utf8');
+console.log('Done! globals.css written with full design system + input fix + mobile responsive.');

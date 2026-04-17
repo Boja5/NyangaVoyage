@@ -1,4 +1,6 @@
-'use client'
+const fs = require('fs');
+
+const content = `'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
 
@@ -43,3 +45,7 @@ export function useLang() {
     mounted: ctx.mounted,
   }
 }
+`;
+
+fs.writeFileSync('lib/i18n.tsx', content, 'utf8');
+console.log('Done: lib/i18n.tsx fixed');

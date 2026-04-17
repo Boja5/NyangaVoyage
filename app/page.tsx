@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useLang } from '@/lib/i18n'
@@ -70,7 +70,9 @@ export default function HomePage() {
   const [trainTo, setTrainTo] = useState('')
   const [trainDate, setTrainDate] = useState('')
   const [trainClass, setTrainClass] = useState('')
-  const t = T[lang]
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => { setIsMounted(true) }, [])
+  const t = T[isMounted ? lang : 'fr']
 
   const handleBusSearch = () => {
     if (!busFrom || !busTo || !busDate) return
