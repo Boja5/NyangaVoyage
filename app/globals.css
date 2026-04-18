@@ -475,3 +475,32 @@ input[type="date"] {
   background-color: #ffffff !important;
   opacity: 1 !important;
 }
+
+/* ---- AGENCIES PAGE ---- */
+@media (max-width: 768px) {
+  /* Agency cards stack to single column */
+  .nv-agencies-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Route cards single column */
+  .nv-routes-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Class cards single column */
+  .nv-classes-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Train stops wrap nicely */
+  .nv-train-stops {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+  /* Departure time cards */
+  .nv-departure-cards {
+    flex-direction: column !important;
+  }
+  /* Sticky mode tabs don't overlap content */
+  .nv-mode-tabs-sticky {
+    top: 60px !important;
+  }
+}

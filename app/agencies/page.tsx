@@ -253,7 +253,7 @@ export default function AgenciesPage() {
       </div>
 
       {/* MODE TABS */}
-      <div style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', position: 'sticky', top: '60px', zIndex: 50 }}>
+      <div className="nv-mode-tabs-sticky" style={{ background: 'var(--nv-bg-surface)', borderBottom: '1.5px solid var(--nv-border)', position: 'sticky', top: '60px', zIndex: 50 }}>
         <div className="nv-container" style={{ padding: '0 clamp(16px,4vw,40px)' }}>
           <div style={{ display: 'flex', maxWidth: '400px' }}>
             <button style={tabStyle(mode === 'bus')} onClick={() => { setMode('bus'); setSelectedAgency(null) }}>{tl.bus}</button>
@@ -267,7 +267,7 @@ export default function AgenciesPage() {
         {/* ---- BUS MODE ---- */}
         {mode === 'bus' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            <div className="nv-agencies-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '32px' }}>
               {BUS_AGENCIES.map(agency => (
                 <div
                   key={agency.id}
@@ -310,7 +310,7 @@ export default function AgenciesPage() {
                   <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: 'clamp(18px,4vw,22px)', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
                     {agency.name} — {tl.classes}
                   </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '32px' }}>
+                  <div className="nv-classes-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px', marginBottom: '32px' }}>
                     {agency.classes.map(cls => (
                       <div key={cls.name} className="nv-card" style={{ padding: '20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -339,7 +339,7 @@ export default function AgenciesPage() {
                   <h2 style={{ fontFamily: 'var(--nv-font-display)', fontSize: 'clamp(18px,4vw,22px)', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '16px' }}>
                     {agency.name} — {tl.allRoutes}
                   </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginBottom: '32px' }}>
+                  <div className="nv-routes-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px', marginBottom: '32px' }}>
                     {agency.routes.map((route, i) => (
                       <div key={i} className="nv-card" style={{ padding: '16px 20px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -427,7 +427,7 @@ export default function AgenciesPage() {
 
                       {/* Departures */}
                       <h3 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '12px' }}>{tl.schedule}</h3>
-                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                      <div className="nv-departure-cards" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '24px' }}>
                         {line.departures.map((dep, i) => (
                           <div key={i} style={{ background: 'var(--nv-bg-surface)', border: '1.5px solid var(--nv-border)', borderRadius: '10px', padding: '12px 16px', minWidth: '180px' }}>
                             <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '22px', fontWeight: 700, color: line.color }}>{dep.time}</div>
@@ -441,7 +441,7 @@ export default function AgenciesPage() {
                       <h3 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '12px' }}>
                         {lang === 'fr' ? 'Arrets' : 'Stops'}
                       </h3>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
+                      <div className="nv-train-stops" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '24px' }}>
                         {line.stops.map((stop, i) => (
                           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ background: line.color, color: '#fff', borderRadius: '50%', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 700, flexShrink: 0 }}>{i + 1}</div>
@@ -453,7 +453,7 @@ export default function AgenciesPage() {
 
                       {/* Classes */}
                       <h3 style={{ fontFamily: 'var(--nv-font-display)', fontSize: '16px', fontWeight: 700, color: 'var(--nv-gray-900)', marginBottom: '12px' }}>{tl.classesAvail}</h3>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
+                      <div className="nv-classes-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
                         {line.classes.map(cls => (
                           <div key={cls.name} className="nv-card" style={{ padding: '16px', background: 'var(--nv-bg-surface)' }}>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -499,7 +499,22 @@ export default function AgenciesPage() {
         <div className="nv-container">
           <div className="nv-footer-inner">
             <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="24" viewBox="0 0 32 32">
+                <rect width="32" height="32" rx="8" fill="#0f172a"/>
+                <path d="M5 24 A11 11 0 0 1 27 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M8 20 A10 10 0 0 1 24 20" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                <circle cx="16" cy="13" r="2.5" fill="#fbbf24"/>
+                <rect x="7" y="24" width="18" height="5" rx="1.5" fill="#16a34a"/>
+                <rect x="9" y="22" width="14" height="3" rx="1" fill="#15803d"/>
+                <rect x="10" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <rect x="14" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <rect x="18" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <circle cx="10" cy="30" r="1.8" fill="#1e293b"/>
+                <circle cx="22" cy="30" r="1.8" fill="#1e293b"/>
+              </svg>
               <div className="nv-footer-logo">NyangaVoyage</div>
+            </div>
               <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: '3px' }}>
                 {lang === 'fr' ? 'La billetterie bus & train du Cameroun.' : "Cameroon's bus & train ticketing platform."}
               </div>

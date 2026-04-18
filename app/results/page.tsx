@@ -243,7 +243,22 @@ function ResultsInner() {
       <footer className="nv-footer" style={{ marginTop: '64px' }}>
         <div className="nv-container">
           <div className="nv-footer-inner">
-            <div className="nv-footer-logo">NyangaVoyage</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg width="24" height="24" viewBox="0 0 32 32">
+                <rect width="32" height="32" rx="8" fill="#0f172a"/>
+                <path d="M5 24 A11 11 0 0 1 27 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round"/>
+                <path d="M8 20 A10 10 0 0 1 24 20" fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
+                <circle cx="16" cy="13" r="2.5" fill="#fbbf24"/>
+                <rect x="7" y="24" width="18" height="5" rx="1.5" fill="#16a34a"/>
+                <rect x="9" y="22" width="14" height="3" rx="1" fill="#15803d"/>
+                <rect x="10" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <rect x="14" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <rect x="18" y="24" width="2.5" height="3" rx="0.5" fill="#bae6fd" opacity="0.7"/>
+                <circle cx="10" cy="30" r="1.8" fill="#1e293b"/>
+                <circle cx="22" cy="30" r="1.8" fill="#1e293b"/>
+              </svg>
+              <div className="nv-footer-logo">NyangaVoyage</div>
+            </div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.35)' }}>&copy; 2026 NyangaVoyage</div>
           </div>
         </div>
