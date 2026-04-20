@@ -1,3 +1,24 @@
+
+/*
+ * ============================================================
+ * FILE: app/admin/login/page.tsx
+ * URL: /admin/login
+ * WHAT THIS FILE DOES:
+ *   Login page for the PLATFORM ADMINISTRATOR (NyangaVoyage staff).
+ *   Different from agency login — the admin can see ALL agencies
+ *   and ALL bookings across the entire platform.
+ *
+ * HOW IT DIFFERS FROM AGENCY LOGIN:
+ *   Checks is_admin = TRUE in the agencies table.
+ *   If someone tries to log in with agency credentials here,
+ *   they get "Acces administrateur refuse."
+ *
+ * ADMIN CREDENTIALS (for demo):
+ *   Email:    admin@nyangavoyage.com
+ *   Password: Admin2026!
+ * ============================================================
+ */
+
 'use client'
 
 import { useState } from 'react'

@@ -1,3 +1,28 @@
+
+/*
+ * ============================================================
+ * FILE: app/train-checkout/page.tsx
+ * URL: /train-checkout?origin=X&class=Y&seat=Z&price=W&...
+ * WHAT THIS FILE DOES:
+ *   Same as checkout/page.tsx but for TRAIN BOOKINGS.
+ *   The key difference: train bookings are NOT saved to Supabase.
+ *   Instead, the complete booking data is saved to localStorage
+ *   as a JSON object, then read by the train ticket page.
+ *
+ * WHY LOCALSTORAGE INSTEAD OF DATABASE FOR TRAINS:
+ *   Train routes don't have a database table (they're static).
+ *   Without a trips table entry, we can't create a proper database booking.
+ *   localStorage is used as a quick solution for the MVP.
+ *
+ * THE BOOKING REFERENCE:
+ *   Generated as 'TR' + random 6 characters: e.g. "TRABCD12"
+ *   The TR prefix distinguishes train tickets from bus tickets.
+ *
+ * DATA FLOW:
+ *   URL params → form → localStorage → /ticket/train/[ref]
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'

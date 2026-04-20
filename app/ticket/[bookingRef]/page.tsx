@@ -1,3 +1,36 @@
+
+/*
+ * ============================================================
+ * FILE: app/ticket/[bookingRef]/page.tsx
+ * URL: /ticket/ABC123XY
+ * WHAT THIS FILE DOES:
+ *   This is the BUS E-TICKET page — the final destination of the
+ *   booking flow. It shows the passenger their confirmed ticket.
+ *
+ * HOW IT LOADS THE BOOKING:
+ *   Uses the bookingRef from the URL to query Supabase:
+ *   supabase.from('bookings')
+ *     .select('*, trips(*, agencies(name)), seats(seat_number)')
+ *     .eq('booking_ref', bookingRef)
+ *   This gets the booking + the trip details + the seat number
+ *   in a single database query using Supabase's JOIN syntax.
+ *
+ * THE SMS TRIGGER:
+ *   On first load, it calls /api/send-sms to send a Twilio SMS
+ *   to the passenger's phone number with their booking details.
+ *   localStorage key 'sms_sent_[ref]' prevents sending twice
+ *   if the page is refreshed.
+ *
+ * THE TICKET DESIGN:
+ *   Green header with booking reference (large, bold)
+ *   Gold accent bar below the header
+ *   Route section with departure time → arrival city
+ *   Details grid: Passenger, Phone, Agency, Class, Seat, Reference
+ *   "Confirme" green badge at the bottom
+ *   Print button triggers window.print()
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

@@ -1,3 +1,29 @@
+<!--
+  FILE: public/favicon.svg
+  WHAT THIS FILE DOES:
+    This is the FAVICON — the small icon that appears in the browser tab
+    next to the page title, and on phone home screens when users save the site.
+
+  THE R5 DESIGN:
+    - Dark background (#0f172a) — matches the app's dark navbar color
+    - Green sunrise arcs — represent new journeys, hope, movement
+    - Gold sun with rays — represents the warmth of Cameroon
+    - Green bus body with blue windows — the core of what NyangaVoyage does
+    - Gold wheels — gold accent color from the design system
+    - Yellow headlight — the bus is moving, going somewhere
+    - Italic "N" in bright green and "V" in gold — NyangaVoyage initials
+
+  HOW BROWSERS USE IT:
+    The <link rel="icon"> tag in layout.tsx points to this file.
+    Modern browsers support SVG favicons directly.
+    The apple-touch-icon version is used when saving to iPhone home screen.
+
+  FORMAT CHOICE:
+    SVG is used instead of PNG/ICO because:
+    - It scales perfectly to any size (16px tab to 512px app icon)
+    - Small file size (under 2KB)
+    - Looks sharp on retina/high-DPI screens
+-->
 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="8" fill="#0f172a"/>
   <path d="M5 24 A11 11 0 0 1 27 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round"/>

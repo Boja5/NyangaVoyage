@@ -1,3 +1,35 @@
+
+/*
+ * ============================================================
+ * FILE: app/train-seats/page.tsx
+ * URL: /train-seats?origin=X&class=Y&price=Z&...
+ * WHAT THIS FILE DOES:
+ *   This page lets passengers choose their TRAIN SEAT or COUCHETTE BERTH.
+ *   It has two different layouts depending on the class chosen:
+ *
+ *   REGULAR SEATS (2nd Class, 1st Class, Premium):
+ *   Shows a 2+2 seat grid (like an airplane layout).
+ *   Green = available, Gray = occupied, Blue = your selection.
+ *
+ *   COUCHETTE BERTHS (night train):
+ *   Shows compartment cards (groups of 2 or 4 berths per compartment).
+ *   Each berth shows "Libre" (free) or "Occupe" (taken).
+ *
+ * WHY NO DATABASE FOR TRAIN SEATS:
+ *   Train seat availability is simulated using a deterministic pattern
+ *   (every 4th seat is "occupied") instead of real database records.
+ *   This avoids needing to create thousands of seat records for trains.
+ *
+ * THE HYDRATION FIX:
+ *   Seats are generated in useEffect (after mount) not in useState
+ *   to avoid server/client mismatch errors.
+ *
+ * ALL DATA PASSED VIA URL:
+ *   Origin, destination, class, price, departure time — everything
+ *   is in the URL so no session storage is needed between pages.
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'

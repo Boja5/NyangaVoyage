@@ -1,3 +1,27 @@
+
+/*
+ * ============================================================
+ * FILE: app/ticket/train/[bookingRef]/page.tsx
+ * URL: /ticket/train/TRABCD12
+ * WHAT THIS FILE DOES:
+ *   The TRAIN E-TICKET page. Similar to the bus ticket but:
+ *   - Gold/amber header instead of green (Camrail branding)
+ *   - Reads booking data from localStorage (not database)
+ *   - Shows departure time, arrival time, duration, compartment number
+ *   - Shows "Couchette N°X" for couchette bookings, "Place N°X" for seats
+ *   - Has "NyangaVoyage x Camrail" co-branding in the header
+ *
+ * DATA SOURCE:
+ *   localStorage.getItem('nv_train_booking') — set during train checkout
+ *   localStorage.getItem('nv_passenger_name') — passenger name
+ *   localStorage.getItem('nv_passenger_phone') — passenger phone
+ *
+ * PRINT FUNCTIONALITY:
+ *   window.print() triggers the browser's print dialog.
+ *   Passengers can print their ticket or save it as PDF.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

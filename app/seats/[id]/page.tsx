@@ -1,3 +1,39 @@
+
+/*
+ * ============================================================
+ * FILE: app/seats/[id]/page.tsx
+ * URL: /seats/[trip-id]
+ * WHAT THIS FILE DOES:
+ *   This is the BUS SEAT MAP — the interactive grid where passengers
+ *   choose which physical seat they want on the bus.
+ *
+ * THE [id] IN THE FILENAME:
+ *   This is a Next.js "dynamic route". The [id] means the URL can be
+ *   /seats/abc123 or /seats/xyz789 — any trip ID works.
+ *   The ID is read with: params.then(p => setTripId(p.id))
+ *
+ * SEAT LAYOUT BY CLASS:
+ *   Normal bus: 2+3 layout (2 seats left, aisle, 3 seats right) = 70 seats
+ *   VIP bus:    2+2 layout (2 seats each side) = 33 seats
+ *   Classic bus: 2+2 layout = 50 seats
+ *   Seats 1,2,3 are permanently reserved (driver + 2 hostesses)
+ *
+ * REAL-TIME SEAT LOCKING:
+ *   When you click a seat, it is immediately "locked" in Supabase
+ *   for 10 minutes. This prevents two people booking the same seat.
+ *   A countdown timer shows how long you have to complete checkout.
+ *   If you don't pay, the lock expires and the seat becomes available again.
+ *
+ * SEAT COLORS:
+ *   Green = available, Blue = your selected seat,
+ *   Yellow = locked by someone else (10 min hold), Gray = already booked
+ *
+ * ON-DEMAND GENERATION:
+ *   Seats are only created in the database when someone FIRST views
+ *   the seat map. Before that, only the trip exists in the database.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

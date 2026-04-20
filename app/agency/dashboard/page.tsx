@@ -1,3 +1,30 @@
+
+/*
+ * ============================================================
+ * FILE: app/agency/dashboard/page.tsx
+ * URL: /agency/dashboard
+ * WHAT THIS FILE DOES:
+ *   The AGENCY DASHBOARD — the home screen after an agency logs in.
+ *   Shows 3 stat cards:
+ *   - Number of active trips
+ *   - Number of confirmed bookings
+ *   - Total revenue in FCFA
+ *
+ *   Plus 2 quick action cards linking to Trips and Bookings pages.
+ *
+ * AUTHENTICATION GUARD:
+ *   First thing on load: checkAuth() verifies the user is logged in.
+ *   If not logged in → redirect to /agency/login immediately.
+ *   If logged in but not an agency → redirect to /agency/login.
+ *   This prevents unauthorized access to the dashboard.
+ *
+ * REVENUE CALCULATION:
+ *   Gets all bookings for this agency's trips, then sums up the prices:
+ *   bookings.reduce((sum, b) => sum + b.trips.price, 0)
+ *   "reduce" is a JavaScript function that accumulates a running total.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

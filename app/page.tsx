@@ -1,3 +1,38 @@
+
+/*
+ * ============================================================
+ * FILE: app/page.tsx
+ * WHAT THIS FILE DOES:
+ *   This is the HOMEPAGE — the first page users see at nyanga-voyages.vercel.app
+ *   It contains:
+ *   1. The hero section with the animated headline
+ *   2. The Bus/Train search form (the most important UI element)
+ *   3. Stats row (3 agencies, 12 cities, SMS, MTN)
+ *   4. Partners strip (Buca Voyages, Garanti Express, Vatican Express, Camrail)
+ *   5. "Why NyangaVoyage?" features section
+ *   6. Popular bus routes grid (12 routes, clickable)
+ *   7. Camrail train routes section (3 lines)
+ *   8. "How it works" 4-step guide
+ *   9. Footer
+ *
+ * THE SEARCH FORM:
+ *   Two tabs (Bus / Train) switch between different city lists and class options.
+ *   When the user clicks "Rechercher", it builds a URL with the search
+ *   parameters and navigates to /results or /train-results.
+ *   Example: /results?origin=Yaounde&destination=Douala&date=2026-04-17
+ *
+ * LANGUAGE:
+ *   All text comes from the T object (T.fr and T.en).
+ *   The isMounted flag prevents hydration errors by always
+ *   rendering French first, then switching to saved language.
+ *
+ * STATE VARIABLES:
+ *   mode: 'bus' or 'train' — which tab is active
+ *   busFrom, busTo, busDate, busClass — the bus search form values
+ *   trainFrom, trainTo, trainDate, trainClass — the train form values
+ * ============================================================
+ */
+
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'

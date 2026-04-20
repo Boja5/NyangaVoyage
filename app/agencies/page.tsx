@@ -1,3 +1,36 @@
+
+/*
+ * ============================================================
+ * FILE: app/agencies/page.tsx
+ * URL: /agencies
+ * WHAT THIS FILE DOES:
+ *   The AGENCIES & OPERATORS INFO PAGE — a comprehensive directory
+ *   of all transport operators available on NyangaVoyage.
+ *
+ *   BUS TAB shows 3 agencies:
+ *   - Buca Voyages (green theme, 45 buses, since 2008)
+ *   - Garanti Express (blue theme, 30 buses, since 2012)
+ *   - Vatican Express (gold theme, 25 buses, since 2015)
+ *   Clicking an agency expands to show: all classes (Normal/Classic/VIP)
+ *   with seat counts, layouts, and amenities; plus all routes with times.
+ *
+ *   TRAIN TAB shows Camrail with 3 lines:
+ *   - Douala-Yaounde Express (263km, 4h45, daily)
+ *   - Yaounde-Ngaoundere Night Train (667km, 13h, couchettes)
+ *   - Douala-Kumba Omnibus (200km, 5h)
+ *   Clicking a line shows: departure times, all stops, all classes.
+ *
+ * THE ACCORDION PATTERN:
+ *   selectedAgency state stores which agency is expanded.
+ *   Clicking the same agency again collapses it (sets to null).
+ *   This is called an "accordion" or "expand/collapse" UI pattern.
+ *
+ * ALL DATA IS HARDCODED:
+ *   Agency info, routes, and amenities are defined as constants
+ *   at the top of the file (BUS_AGENCIES, TRAIN_LINES arrays).
+ * ============================================================
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

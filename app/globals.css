@@ -1,3 +1,39 @@
+
+/*
+ * ============================================================
+ * FILE: app/globals.css
+ * WHAT THIS FILE DOES:
+ *   This is the ENTIRE DESIGN SYSTEM for NyangaVoyage.
+ *   It defines ALL colors, fonts, buttons, cards, inputs,
+ *   badges, alerts, and mobile responsive rules in one place.
+ *
+ *   Think of it like a brand guidelines document translated into code.
+ *   Every green color, every rounded corner, every shadow —
+ *   all defined here using CSS variables (custom properties).
+ *
+ * HOW IT WORKS:
+ *   :root { --nv-green-600: #16a34a }  <- defines the color once
+ *   Then anywhere in the app: color: var(--nv-green-600)  <- uses it
+ *   If we want to change the green, we change it HERE and it updates everywhere.
+ *
+ * SECTIONS IN THIS FILE:
+ *   1. CSS Variables (colors, fonts, spacing, shadows)
+ *   2. Base reset (removes browser default margins/padding)
+ *   3. Layout (.nv-container, .nv-section)
+ *   4. Navbar (.nv-nav, .nv-nav-logo, .nv-nav-link)
+ *   5. Language toggle (.nv-lang-toggle, .nv-lang-btn)
+ *   6. Buttons (.nv-btn, .nv-btn-primary, .nv-btn-secondary)
+ *   7. Cards (.nv-card, .nv-card-hover)
+ *   8. Form inputs (.nv-input, .nv-select, .nv-label)
+ *   9. Badges (.nv-badge, .nv-badge-vip, .nv-badge-green etc.)
+ *   10. Alerts (.nv-alert-success, .nv-alert-warning etc.)
+ *   11. Spinner (loading animation)
+ *   12. Footer (.nv-footer, .nv-footer-logo)
+ *   13. Mobile responsive (@media max-width: 768px)
+ *   14. Input visibility fix for mobile browsers
+ * ============================================================
+ */
+
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
 /* ============================================================

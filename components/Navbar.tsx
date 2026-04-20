@@ -1,3 +1,30 @@
+
+/*
+ * ============================================================
+ * FILE: components/Navbar.tsx
+ * WHAT THIS FILE DOES:
+ *   This is the SHARED NAVIGATION BAR that appears at the top
+ *   of EVERY page in the app.
+ *
+ *   It automatically shows different links depending on where you are:
+ *   - On normal pages: shows Trajets, Agencies links + FR/EN toggle + Espace Agence button
+ *   - On agency pages: shows Dashboard, Mes Trajets, Reservations links
+ *   - On admin pages: shows "Admin" label
+ *
+ *   The FR/EN toggle here updates the language for THE ENTIRE APP
+ *   because it uses useLang() from i18n.tsx (shared context).
+ *
+ * WHY IT'S A SEPARATE COMPONENT:
+ *   Instead of copying the navbar HTML into every page (20+ pages),
+ *   we write it ONCE here and every page just writes <Navbar />.
+ *   If we want to change the navbar, we change it here and ALL pages update.
+ *
+ * usePathname():
+ *   A Next.js hook that tells us which page we're on right now.
+ *   We use it to highlight the active nav link with "active" CSS class.
+ * ============================================================
+ */
+
 'use client'
 
 import Link from 'next/link'

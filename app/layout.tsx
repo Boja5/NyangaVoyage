@@ -1,3 +1,27 @@
+
+/*
+ * ============================================================
+ * FILE: app/layout.tsx
+ * WHAT THIS FILE DOES:
+ *   This is the ROOT LAYOUT — it wraps EVERY page in the app.
+ *   Think of it like a picture frame that holds all pages.
+ *   It does 3 important things:
+ *   1. Loads the Google Fonts (Syne for headings, DM Sans for body text)
+ *   2. Sets the browser tab title and the WhatsApp/Facebook preview image
+ *   3. Wraps everything in LangProvider so ALL pages share the same language (FR/EN)
+ *
+ * WHY IT EXISTS:
+ *   In Next.js, layout.tsx is special — it runs on EVERY page automatically.
+ *   Without it, each page would need its own font loading and language setup.
+ *   By putting it here once, every page inherits it automatically.
+ *
+ * KEY CONCEPTS:
+ *   - metadata: controls what appears in browser tabs and social media previews
+ *   - LangProvider: a React "context" that shares language state across all pages
+ *   - crossOrigin: required by Google Fonts for security
+ * ============================================================
+ */
+
 import type { Metadata } from 'next'
 import './globals.css'
 import { LangProvider } from '@/lib/i18n'

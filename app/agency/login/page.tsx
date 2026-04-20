@@ -1,3 +1,31 @@
+
+/*
+ * ============================================================
+ * FILE: app/agency/login/page.tsx
+ * URL: /agency/login
+ * WHAT THIS FILE DOES:
+ *   The LOGIN PAGE for bus agency staff (not passengers).
+ *   Agencies log in to manage their trips and view bookings.
+ *
+ * HOW AUTHENTICATION WORKS:
+ *   1. Agency enters email + password
+ *   2. supabase.auth.signInWithPassword() checks credentials
+ *   3. If valid, we check the agencies table for a matching user_id
+ *      where is_admin = false (to ensure it's an agency, not admin)
+ *   4. If agency found → redirect to /agency/dashboard
+ *   5. If not found → show error "Aucune agence associee"
+ *
+ * AGENCY CREDENTIALS (for demo):
+ *   Buca Voyages:     buca@nyangavoyage.com / Buca2026!
+ *   Garanti Express:  garanti@nyangavoyage.com / Garanti2026!
+ *   Vatican Express:  vatican@nyangavoyage.com / Vatican2026!
+ *
+ * SUPABASE AUTH:
+ *   Supabase handles password hashing, JWT tokens, and sessions.
+ *   We never store passwords ourselves — Supabase manages all of that.
+ * ============================================================
+ */
+
 'use client'
 
 import { useState } from 'react'

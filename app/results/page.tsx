@@ -1,3 +1,35 @@
+
+/*
+ * ============================================================
+ * FILE: app/results/page.tsx
+ * URL: /results?origin=X&destination=Y&date=Z
+ * WHAT THIS FILE DOES:
+ *   This page shows ALL AVAILABLE BUS TRIPS for a searched route and date.
+ *   It reads the search parameters from the URL (origin, destination, date)
+ *   then queries Supabase for matching trips.
+ *
+ * HOW THE DATABASE QUERY WORKS:
+ *   supabase.from('trips')     <- look in the trips table
+ *   .select('*, agencies(name)')  <- get trip data + agency name
+ *   .eq('origin', origin)     <- where origin matches
+ *   .eq('destination', dest)  <- AND destination matches
+ *   .gte('departure_time', dayStart)  <- AND date is today
+ *   .lte('departure_time', dayEnd)    <- AND date is today
+ *
+ * THE SIDEBAR FILTER:
+ *   Buttons for Tous/Matin/Apres-midi/Soir filter the results
+ *   by departure hour using JavaScript (no new database query needed).
+ *
+ * DISTANCE AND DURATION:
+ *   Stored in DISTANCE_MAP and DURATION_MAP objects — hardcoded
+ *   because Cameroon road distances don't change.
+ *
+ * CLICKING A TRIP:
+ *   router.push('/seats/' + trip.id) — navigates to the seat map
+ *   for that specific trip.
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense } from 'react'

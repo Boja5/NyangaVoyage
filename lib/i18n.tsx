@@ -1,3 +1,31 @@
+
+/*
+ * ============================================================
+ * FILE: lib/i18n.tsx
+ * WHAT THIS FILE DOES:
+ *   This file powers the FR/EN LANGUAGE TOGGLE across the entire app.
+ *   "i18n" stands for "internationalization" (18 letters between i and n).
+ *
+ *   It creates a React "Context" — think of it like a global variable
+ *   that ALL pages can read and update simultaneously.
+ *   When a user clicks FR or EN in the navbar, this file saves the choice
+ *   to localStorage so it persists even when the page refreshes.
+ *
+ * HOW IT WORKS:
+ *   1. LangProvider wraps the whole app (in layout.tsx)
+ *   2. Any page calls useLang() to get the current language
+ *   3. When setLang('en') is called, all pages update instantly
+ *
+ * THE MOUNTED FIX:
+ *   Next.js renders pages on the SERVER first (in French).
+ *   Then the browser loads and reads localStorage (might be English).
+ *   If they don't match, React throws a "hydration error".
+ *   Solution: always render French first, THEN switch after mount.
+ *   The "mounted" flag controls this — it starts false (server safe)
+ *   and becomes true only after the component loads in the browser.
+ * ============================================================
+ */
+
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'

@@ -1,3 +1,29 @@
+
+/*
+ * ============================================================
+ * FILE: lib/supabase.ts
+ * WHAT THIS FILE DOES:
+ *   This file creates the CONNECTION to our Supabase database.
+ *   Supabase is our backend — it stores all trips, seats, bookings,
+ *   and agencies in a PostgreSQL database hosted in the cloud.
+ *
+ *   This file exports a single "supabase" object that every other
+ *   file imports to read/write data. Think of it as the phone line
+ *   to the database — you only set it up once.
+ *
+ * HOW IT WORKS:
+ *   createClient(URL, KEY) connects to our Supabase project.
+ *   The URL and KEY come from .env.local (never committed to GitHub).
+ *   persistSession: false — we don't need user login sessions
+ *   autoRefreshToken: false — we don't use auth tokens
+ *
+ * USAGE EXAMPLE:
+ *   import { supabase } from '@/lib/supabase'
+ *   const { data } = await supabase.from('trips').select('*')
+ *   // data now contains all trips from the database
+ * ============================================================
+ */
+
 import { createClient } from '@supabase/supabase-js'
 // createClient is the function that creates our Supabase connection
 

@@ -1,3 +1,29 @@
+
+/*
+ * ============================================================
+ * FILE: app/train-results/page.tsx
+ * URL: /train-results?origin=X&destination=Y&date=Z
+ * WHAT THIS FILE DOES:
+ *   Shows available CAMRAIL TRAIN routes for a searched journey.
+ *   Unlike bus results, train routes are STATIC (hardcoded) because
+ *   Camrail has fixed schedules that rarely change.
+ *
+ * WHY STATIC AND NOT DATABASE:
+ *   Camrail only has 3 lines with fixed timetables.
+ *   Putting them in a database would add complexity with no benefit.
+ *   The static data is defined as TRAIN_ROUTES array in this file.
+ *
+ * CLASS SELECTION:
+ *   Each train route has multiple classes (2nd, Premium, 1st, Couchette).
+ *   When a user clicks a class button, they go to /train-seats
+ *   with all the journey details passed as URL parameters.
+ *
+ * THE CAMRAIL BADGE:
+ *   The gold "Camrail" badge on each card identifies these as
+ *   official national railway services, distinct from bus agencies.
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense } from 'react'

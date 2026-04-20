@@ -1,3 +1,42 @@
+
+/*
+ * ============================================================
+ * FILE: app/checkout/page.tsx
+ * URL: /checkout?tripId=X&seatId=Y&seatNumber=Z
+ * WHAT THIS FILE DOES:
+ *   This is the BUS PAYMENT PAGE where passengers:
+ *   1. Enter their full name and phone number
+ *   2. Enter their MTN Mobile Money number
+ *   3. Click "Payer" to simulate payment
+ *   4. Watch a 5-second countdown (simulating MoMo notification)
+ *   5. Get redirected to their ticket
+ *
+ * FORM VALIDATION:
+ *   Before payment, the form checks:
+ *   - Full name is not empty
+ *   - Phone number is 9 digits
+ *   - MoMo number is 9 digits
+ *   If any check fails, a red error message appears under that field.
+ *
+ * THE PAYMENT SIMULATION:
+ *   Real MTN MoMo API requires business registration.
+ *   For the MVP, we simulate it with a 5-second countdown.
+ *   The countdown uses useEffect with a timer that decrements each second.
+ *   When it reaches 1 (not 0) it triggers finishBooking() to avoid
+ *   calling it twice.
+ *
+ * WHAT HAPPENS AFTER PAYMENT:
+ *   1. The seat status is updated to 'booked' in Supabase
+ *   2. A booking record is created with a random booking reference
+ *   3. The passenger name/phone is saved to localStorage
+ *   4. User is redirected to /ticket/[bookingRef]
+ *
+ * PASSENGER DATA STORAGE:
+ *   Name and phone are stored in localStorage (browser storage)
+ *   because we have no user accounts in this MVP.
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense, useState, useEffect } from 'react'

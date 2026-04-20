@@ -1,3 +1,33 @@
+
+/*
+ * ============================================================
+ * FILE: app/admin/dashboard/page.tsx
+ * URL: /admin/dashboard
+ * WHAT THIS FILE DOES:
+ *   The ADMIN CONTROL PANEL — platform-wide overview with 3 tabs:
+ *
+ *   TAB 1 — Vue d'ensemble (Overview):
+ *   Shows 4 stats: total agencies, total trips, total bookings, total revenue.
+ *   All data loaded in parallel using Promise.all() for speed.
+ *
+ *   TAB 2 — Agences (Agencies):
+ *   Left: list of all registered agencies with active/inactive status.
+ *   Right: form to ADD a new agency (creates Supabase auth account + agency record).
+ *
+ *   TAB 3 — Reservations (Bookings):
+ *   Table of ALL bookings across ALL agencies on the platform.
+ *
+ * ADDING AN AGENCY:
+ *   Step 1: supabase.auth.signUp() — creates login credentials
+ *   Step 2: supabase.from('agencies').insert() — creates agency profile
+ *   The agency can then log in at /agency/login with those credentials.
+ *
+ * Promise.all():
+ *   Runs 3 database queries SIMULTANEOUSLY instead of one after another.
+ *   This makes the dashboard load 3x faster.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

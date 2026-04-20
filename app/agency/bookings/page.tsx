@@ -1,3 +1,27 @@
+
+/*
+ * ============================================================
+ * FILE: app/agency/bookings/page.tsx
+ * URL: /agency/bookings
+ * WHAT THIS FILE DOES:
+ *   Shows a TABLE of all confirmed bookings for this agency's trips.
+ *   Columns: Reference, Date, Route, Departure, Class, Seat, Price.
+ *
+ * HOW THE QUERY WORKS:
+ *   Step 1: Get all trip IDs belonging to this agency
+ *   Step 2: Get all bookings where trip_id is in that list (.in())
+ *   Step 3: Include trip details and seat number in the same query
+ *
+ *   This is called a JOIN — getting related data from multiple tables
+ *   in a single database request.
+ *
+ * READ-ONLY VIEW:
+ *   Agency staff can only VIEW bookings, not modify or cancel them.
+ *   This is intentional for the MVP — cancellation logic would
+ *   require refund processing which needs the real MoMo API.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'

@@ -1,3 +1,29 @@
+
+/*
+ * ============================================================
+ * FILE: app/search/page.tsx
+ * URL: /search
+ * WHAT THIS FILE DOES:
+ *   A dedicated SEARCH PAGE separate from the homepage.
+ *   Accessible from the "Trajets" link in the navbar.
+ *
+ *   Contains the same Bus/Train search form as the homepage
+ *   but in a cleaner, full-page layout with:
+ *   - A hero banner with the search card
+ *   - A "Popular Routes" section below (6 common routes)
+ *   - Clicking a popular route auto-fills the search form
+ *
+ * WHY THIS PAGE EXISTS SEPARATELY:
+ *   Users who land on internal pages (ticket, results) can navigate
+ *   here via the navbar to start a new search without going back home.
+ *
+ * SUSPENSE WRAPPER:
+ *   useSearchParams() requires the component to be wrapped in
+ *   React Suspense to work correctly in Next.js App Router.
+ *   The Suspense fallback shows a spinner while the page loads.
+ * ============================================================
+ */
+
 'use client'
 
 import { Suspense, useState } from 'react'

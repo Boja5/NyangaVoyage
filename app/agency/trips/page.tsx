@@ -1,3 +1,31 @@
+
+/*
+ * ============================================================
+ * FILE: app/agency/trips/page.tsx
+ * URL: /agency/trips
+ * WHAT THIS FILE DOES:
+ *   Lets agency staff ADD and DELETE their bus trips.
+ *   This is how new trips appear in the passenger search results.
+ *
+ * ADDING A TRIP:
+ *   The form collects: origin, destination, date, time, class, price.
+ *   Seat count is automatically set based on class:
+ *   Normal=70, Classic=50, VIP=33 (no manual entry needed).
+ *   The date and time are combined: date + 'T' + time + ':00+00'
+ *   (the +00 means UTC timezone).
+ *   Then inserted into Supabase trips table with the agency's ID.
+ *
+ * DELETING A TRIP:
+ *   First deletes all seats for that trip (foreign key constraint)
+ *   Then deletes the trip itself.
+ *   confirm() shows a browser dialog asking "are you sure?"
+ *
+ * ONLY SHOWS THIS AGENCY'S TRIPS:
+ *   .eq('agency_id', ag.id) — filters to only this agency's data.
+ *   An agency cannot see or modify another agency's trips.
+ * ============================================================
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
