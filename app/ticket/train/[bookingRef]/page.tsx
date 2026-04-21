@@ -1,35 +1,25 @@
-
-/*
- * ============================================================
- * FILE: app/ticket/train/[bookingRef]/page.tsx
- * URL: /ticket/train/TRABCD12
- * WHAT THIS FILE DOES:
- *   The TRAIN E-TICKET page. Similar to the bus ticket but:
- *   - Gold/amber header instead of green (Camrail branding)
- *   - Reads booking data from localStorage (not database)
- *   - Shows departure time, arrival time, duration, compartment number
- *   - Shows "Couchette N°X" for couchette bookings, "Place N°X" for seats
- *   - Has "NyangaVoyage x Camrail" co-branding in the header
- *
- * DATA SOURCE:
- *   localStorage.getItem('nv_train_booking') — set during train checkout
- *   localStorage.getItem('nv_passenger_name') — passenger name
- *   localStorage.getItem('nv_passenger_phone') — passenger phone
- *
- * PRINT FUNCTIONALITY:
- *   window.print() triggers the browser's print dialog.
- *   Passengers can print their ticket or save it as PDF.
- * ============================================================
- */
-
 'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useLang } from '@/lib/i18n'
+import Navbar from '@/components/Navbar'
+
+function QRCode({ value, size = 140 }: { value: string; size?: number }) {
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}&bgcolor=ffffff&color=0f172a&margin=10`
+  return (
+    <img src={url} alt="QR Code" width={size} height={size}
+      style={{ borderRadius: '8px', border: '3px solid #d97706', display: 'block' }} />
+  )
+}
 
 export default function TrainTicketPage({ params }: { params: Promise<{ bookingRef: string }> }) {
+  const { lang } = useLang()
   const [bookingRef, setBookingRef] = useState('')
   const [booking, setBooking] = useState<any>(null)
+
+  const passengerName = typeof window !== 'undefined' ? localStorage.getItem('nv_passenger_name') || '' : ''
+  const passengerPhone = typeof window !== 'undefined' ? localStorage.getItem('nv_passenger_phone') || '' : ''
 
   useEffect(() => {
     params.then(p => {
@@ -39,8 +29,26 @@ export default function TrainTicketPage({ params }: { params: Promise<{ bookingR
     })
   }, [params])
 
-  const passengerName = typeof window !== 'undefined' ? localStorage.getItem('nv_passenger_name') || '' : ''
-  const passengerPhone = typeof window !== 'undefined' ? localStorage.getItem('nv_passenger_phone') || '' : ''
+  function buildQRData() {
+    if (!booking) return ''
+    return JSON.stringify({
+      ref: bookingRef,
+      passenger: passengerName || 'N/A',
+      phone: passengerPhone ? '+237' + passengerPhone : 'N/A',
+      origin: booking.origin,
+      destination: booking.destination,
+      date: booking.date,
+      depart: booking.depart,
+      arrive: booking.arrive,
+      class: booking.className,
+      seat: booking.seat,
+      compartment: booking.compartment || 'N/A',
+      price: booking.price + ' FCFA',
+      operator: 'Camrail',
+      status: 'CONFIRMED',
+      type: 'TRAIN',
+    })
+  }
 
   if (!booking) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -52,41 +60,28 @@ export default function TrainTicketPage({ params }: { params: Promise<{ bookingR
 
   return (
     <div style={{ fontFamily: 'var(--nv-font-body)', minHeight: '100vh', background: 'var(--nv-bg-page)' }}>
+      <Navbar />
 
-      <nav className="nv-nav">
-        <div className="nv-nav-inner">
-          <Link href="/" className="nv-nav-logo">NyangaVoyage</Link>
-          <div className="nv-nav-right">
-            <span className="nv-badge nv-badge-gold">Camrail</span>
-            <button onClick={() => window.print()} className="nv-btn nv-btn-secondary nv-btn-sm">
-              Imprimer
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="nv-container" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <div className="nv-container" style={{ padding: 'clamp(20px,5vw,40px)' }}>
+        <div style={{ maxWidth: '640px', margin: '0 auto' }}>
 
           <div className="nv-alert nv-alert-success" style={{ marginBottom: '24px', padding: '16px 20px' }}>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '2px' }}>
-                Reservation Camrail confirmee !
-              </div>
-              <div style={{ fontSize: '13px' }}>
-                Votre billet a ete envoye par SMS au +237 {passengerPhone}
-              </div>
+            <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '2px' }}>
+              {lang === 'fr' ? 'Reservation Camrail confirmee !' : 'Camrail booking confirmed!'}
+            </div>
+            <div style={{ fontSize: '13px' }}>
+              {lang === 'fr' ? 'Billet envoye par SMS au' : 'Ticket sent by SMS to'} +237 {passengerPhone}
             </div>
           </div>
 
           <div className="nv-card" style={{ padding: '0', overflow: 'hidden' }}>
 
-            {/* Gold header for train */}
+            {/* Gold header */}
             <div style={{ background: 'var(--nv-gold-600)', padding: '28px 32px', color: '#fff' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                 <div>
                   <div style={{ fontSize: '12px', fontWeight: 600, opacity: 0.85, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    Billet de train Camrail
+                    {lang === 'fr' ? 'Billet de train Camrail' : 'Camrail Train Ticket'}
                   </div>
                   <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '32px', fontWeight: 800, letterSpacing: '-0.02em' }}>
                     {bookingRef}
@@ -104,70 +99,68 @@ export default function TrainTicketPage({ params }: { params: Promise<{ bookingR
             <div style={{ height: '4px', background: 'linear-gradient(90deg, var(--nv-green-400), var(--nv-green-600))' }} />
 
             {/* Route */}
-            <div style={{ padding: '28px 32px', borderBottom: '1.5px solid var(--nv-border)' }}>
+            <div style={{ padding: '24px 32px', borderBottom: '1.5px solid var(--nv-border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--nv-gray-900)' }}>
-                    {booking.depart}
-                  </div>
+                  <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--nv-gray-900)' }}>{booking.depart}</div>
                   <div style={{ fontSize: '14px', color: 'var(--nv-text-secondary)' }}>{booking.origin}</div>
                 </div>
                 <div style={{ flex: 1, textAlign: 'center' }}>
                   <div style={{ height: '1.5px', background: 'var(--nv-border)', position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', background: 'var(--nv-bg-surface)', padding: '0 8px', fontSize: '18px', color: 'var(--nv-gold-600)' }}>
-                      &rarr;
-                    </div>
+                    <div style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', background: 'var(--nv-bg-surface)', padding: '0 8px', fontSize: '18px', color: 'var(--nv-gold-600)' }}>&rarr;</div>
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--nv-text-muted)', marginTop: '6px' }}>{booking.duration}</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--nv-gray-900)' }}>
-                    {booking.arrive}
-                  </div>
+                  <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '26px', fontWeight: 800, color: 'var(--nv-gray-900)' }}>{booking.arrive}</div>
                   <div style={{ fontSize: '14px', color: 'var(--nv-text-secondary)' }}>{booking.destination}</div>
                 </div>
               </div>
               <div style={{ textAlign: 'center', fontSize: '13px', color: 'var(--nv-text-secondary)' }}>
-                {booking.date && new Date(booking.date).toLocaleDateString('fr-CM', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                {booking.date && new Date(booking.date).toLocaleDateString(lang === 'fr' ? 'fr-CM' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
               </div>
             </div>
 
-            {/* Details */}
-            <div style={{ padding: '24px 32px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', borderBottom: '1.5px solid var(--nv-border)' }}>
-              {[
-                { label: 'Passager', value: passengerName || 'N/A' },
-                { label: 'Telephone', value: '+237 ' + (passengerPhone || 'N/A') },
-                { label: 'Classe', value: booking.className },
-                { label: isCouchette ? 'Couchette N' : 'Place N', value: booking.seat + (booking.compartment ? ' - Comp. ' + booking.compartment : '') },
-                { label: 'Distance', value: booking.km + ' km' },
-                { label: 'Reference', value: bookingRef },
-              ].map((row, i) => (
-                <div key={i}>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--nv-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '3px' }}>
-                    {row.label}
+            {/* Details + QR */}
+            <div style={{ padding: '24px 32px', display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap', borderBottom: '1.5px solid var(--nv-border)' }}>
+              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', minWidth: '200px' }}>
+                {[
+                  { label: lang === 'fr' ? 'Passager' : 'Passenger', value: passengerName || 'N/A' },
+                  { label: lang === 'fr' ? 'Telephone' : 'Phone', value: '+237 ' + (passengerPhone || 'N/A') },
+                  { label: 'Classe', value: booking.className },
+                  { label: isCouchette ? 'Couchette' : (lang === 'fr' ? 'Place' : 'Seat'), value: 'N°' + booking.seat + (booking.compartment ? ' - Comp.' + booking.compartment : '') },
+                  { label: lang === 'fr' ? 'Distance' : 'Distance', value: booking.km + ' km' },
+                  { label: lang === 'fr' ? 'Reference' : 'Reference', value: bookingRef },
+                ].map((row, i) => (
+                  <div key={i}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--nv-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '3px' }}>{row.label}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--nv-gray-900)' }}>{row.value}</div>
                   </div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: 'var(--nv-gray-900)' }}>
-                    {row.value}
-                  </div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <QRCode value={buildQRData()} size={140} />
+                <div style={{ fontSize: '11px', color: 'var(--nv-text-muted)', textAlign: 'center', maxWidth: '140px' }}>
+                  {lang === 'fr' ? 'Scanner pour verifier le billet' : 'Scan to verify ticket'}
                 </div>
-              ))}
+              </div>
             </div>
 
-            <div style={{ padding: '16px 32px', background: 'var(--nv-gray-50)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+            <div style={{ padding: '14px 32px', background: 'var(--nv-gray-50)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
               <div style={{ fontSize: '12px', color: 'var(--nv-text-muted)' }}>
-                Presentez ce billet au controleur Camrail a bord du train.
+                {lang === 'fr' ? 'Presentez ce billet au controleur Camrail.' : 'Show this ticket to the Camrail inspector.'}
               </div>
-              <span className="nv-badge nv-badge-gold">Confirme</span>
+              <span className="nv-badge nv-badge-gold">{lang === 'fr' ? 'Confirme' : 'Confirmed'}</span>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
             <Link href="/" className="nv-btn nv-btn-secondary" style={{ flex: 1, justifyContent: 'center' }}>
-              Retour a l'accueil
+              {lang === 'fr' ? 'Retour a l accueil' : 'Back to home'}
             </Link>
-            <Link href="/search" className="nv-btn nv-btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
-              Nouveau trajet
-            </Link>
+            <button onClick={() => window.print()} className="nv-btn nv-btn-primary" style={{ flex: 1 }}>
+              {lang === 'fr' ? 'Imprimer' : 'Print'}
+            </button>
           </div>
         </div>
       </div>

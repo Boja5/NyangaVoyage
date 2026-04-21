@@ -1,4 +1,10 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+// ============================================================
+// FILE 1: app/page.tsx — Complete homepage with ALL working buttons
+// ============================================================
+const homePage = `'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -433,3 +439,25 @@ export default function HomePage() {
     </div>
   )
 }
+`;
+
+fs.writeFileSync(path.join('app', 'page.tsx'), homePage, 'utf8');
+console.log('Written: app/page.tsx - all buttons working');
+
+// ============================================================
+// Also fix globals.css to hide lang toggle
+// ============================================================
+let css = fs.readFileSync(path.join('app', 'globals.css'), 'utf8');
+if (!css.includes('nv-lang-toggle { display: none')) {
+  css += '\n.nv-lang-toggle { display: none !important; }\n';
+  fs.writeFileSync(path.join('app', 'globals.css'), css, 'utf8');
+  console.log('Updated: globals.css - language toggle hidden');
+}
+
+console.log('\nAll done! Fixed:');
+console.log('- Bus search button works');
+console.log('- Train search button works');
+console.log('- Bus route cards are now buttons that work on click');
+console.log('- Train route cards are now buttons that work on click');
+console.log('- Language toggle hidden (auto-detected from device)');
+console.log('- Error messages shown if fields are empty');
