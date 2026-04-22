@@ -1,0 +1,4 @@
+
+// IMPORTANT: Run this SQL in Supabase to add passenger columns if missing:
+// ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_name text;
+// ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_phone text;

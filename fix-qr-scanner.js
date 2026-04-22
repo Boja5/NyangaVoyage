@@ -1,4 +1,11 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+// ============================================================
+// FILE 1: app/agency/scan/page.tsx
+// Real QR scanner that looks up booking from Supabase
+// ============================================================
+const scanPage = `'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -299,7 +306,7 @@ export default function AgencyScanPage() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '28px', color: 'white', fontWeight: 800,
                 }}>
-                  {isValid ? '✓' : '✗'}
+                  {isValid ? '\u2713' : '\u2717'}
                 </div>
                 <div>
                   <div style={{ fontFamily: 'var(--nv-font-display)', fontSize: '22px', fontWeight: 800, color: isValid ? '#15803d' : '#dc2626' }}>
@@ -353,3 +360,26 @@ export default function AgencyScanPage() {
     </div>
   )
 }
+`;
+
+// ============================================================
+// FILE 2: Update bus checkout to save passenger info in booking
+// The issue is passenger_name and passenger_phone aren't saved
+// ============================================================
+const checkoutPatch = `
+// IMPORTANT: Run this SQL in Supabase to add passenger columns if missing:
+// ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_name text;
+// ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_phone text;
+`;
+
+const scanDir = path.join('app', 'agency', 'scan');
+if (!fs.existsSync(scanDir)) fs.mkdirSync(scanDir, { recursive: true });
+fs.writeFileSync(path.join(scanDir, 'page.tsx'), scanPage, 'utf8');
+console.log('Written: app/agency/scan/page.tsx - real Supabase lookup');
+
+fs.writeFileSync('SUPABASE_SQL_FIX.txt', checkoutPatch, 'utf8');
+console.log('Written: SUPABASE_SQL_FIX.txt');
+
+console.log('\nNow run this SQL in Supabase editor:');
+console.log('ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_name text;');
+console.log('ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_phone text;');
