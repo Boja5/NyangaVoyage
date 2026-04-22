@@ -1,4 +1,16 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+// ============================================================
+// 1. Permanently disable service worker
+// ============================================================
+fs.writeFileSync('public/sw.js', 'self.addEventListener("fetch", function(e) {});', 'utf8');
+console.log('Service worker disabled permanently');
+
+// ============================================================
+// 2. Rewrite app/results/page.tsx — Bus search results
+// ============================================================
+const resultsPage = `'use client'
 
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -231,3 +243,15 @@ export default function ResultsPage() {
     </Suspense>
   )
 }
+`;
+
+const resultsDir = path.join('app', 'results');
+if (!fs.existsSync(resultsDir)) fs.mkdirSync(resultsDir, { recursive: true });
+fs.writeFileSync(path.join(resultsDir, 'page.tsx'), resultsPage, 'utf8');
+console.log('Written: app/results/page.tsx');
+
+console.log('\nAll done! Now run:');
+console.log('1. Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue');
+console.log('2. npm run dev');
+console.log('3. In Chrome DevTools > Application > Service Workers > click Unregister');
+console.log('4. Refresh the page');
