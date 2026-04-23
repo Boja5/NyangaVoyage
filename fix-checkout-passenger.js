@@ -1,4 +1,7 @@
-'use client'
+const fs = require('fs');
+const path = require('path');
+
+const checkout = `'use client'
 
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -136,7 +139,7 @@ function CheckoutContent() {
         seat_id: seatId,
         booking_ref: ref,
         passenger_name: name.trim(),
-        passenger_phone: '+237' + phone.trim().replace(/^(+237|237)/, ''),
+        passenger_phone: '+237' + phone.trim().replace(/^(\+237|237)/, ''),
         status: 'confirmed',
       })
 
@@ -294,7 +297,7 @@ function CheckoutContent() {
                   { label: t.departure,value: formatTime(trip.departure_time) + ' — ' + formatDate(trip.departure_time) },
                   { label: t.agency,   value: trip.agencies?.name },
                   { label: t.class,    value: trip.bus_class },
-                  { label: t.seat,     value: 'N°' + seatNum },
+                  { label: t.seat,     value: 'N\u00b0' + seatNum },
                 ].map((row, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', fontSize: '14px' }}>
                     <span style={{ color: 'var(--nv-text-secondary)', flexShrink: 0 }}>{row.label}</span>
@@ -328,3 +331,13 @@ export default function CheckoutPage() {
     </Suspense>
   )
 }
+`;
+
+const checkoutDir = path.join('app', 'checkout');
+if (!fs.existsSync(checkoutDir)) fs.mkdirSync(checkoutDir, { recursive: true });
+fs.writeFileSync(path.join(checkoutDir, 'page.tsx'), checkout, 'utf8');
+console.log('Written: app/checkout/page.tsx');
+console.log('Passenger name and phone are now saved to Supabase bookings table.');
+console.log('\nMake sure you ran this SQL in Supabase:');
+console.log('ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_name text;');
+console.log('ALTER TABLE bookings ADD COLUMN IF NOT EXISTS passenger_phone text;');
