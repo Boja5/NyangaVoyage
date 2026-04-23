@@ -136,7 +136,7 @@ function CheckoutContent() {
         seat_id: seatId,
         booking_ref: ref,
         passenger_name: name.trim(),
-        passenger_phone: '+237' + phone.trim().replace(/^(+237|237)/, ''),
+        passenger_phone: '+237' + phone.trim().replace(/^0+/, ''),
         status: 'confirmed',
       })
 
